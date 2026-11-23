@@ -7,7 +7,7 @@ import { getT, pageMetadata } from '@/lib/i18n-server';
 import { todayInDushanbe } from '@/lib/format';
 import { displayDate } from '@/lib/booking-rules';
 import { pickName, shiftDate } from '@/lib/prices-rules';
-import { getEnteredPrices, listMarkets, listProducts } from '@/lib/queries/prices-manage';
+import { getEnteredPrices, getPreviousPrices, listMarkets, listProducts } from '@/lib/queries/prices-manage';
 import { savePricesAction } from './actions';
 
 export const generateMetadata = () => pageMetadata('page.reporter');
@@ -31,7 +31,7 @@ export default async function ReporterPage({
 
   if (!market) {
     return (
-      <div className="mx-auto w-full max-w-md px-4 py-8">
+      <div className="mx-auto w-full max-w-md">
         <OrnateHeading>{t('prc.reporterTitle')}</OrnateHeading>
         <p className="mt-4 font-medium">{t('prc.chooseMarket')}</p>
         {markets.length === 0 ? (
@@ -53,6 +53,10 @@ export default async function ReporterPage({
 
   const products = await listProducts(true);
   const entered = await getEnteredPrices(market.id, date);
+  // Последняя цена этого рынка до выбранного дня — подсказка репортёру
+  const last = Object.fromEntries(
+    (await getPreviousPrices(date)).filter((p) => p.market_id === market.id).map((p) => [p.product_id, p.price]),
+  );
 
   const base = `/reporter?market=${encodeURIComponent(market.id)}`;
   const tab = (active: boolean) =>
@@ -61,7 +65,7 @@ export default async function ReporterPage({
     }`;
 
   return (
-    <div className="mx-auto w-full max-w-md px-4 py-8">
+    <div className="mx-auto w-full max-w-md">
       <OrnateHeading>{pickName(market, lang)}</OrnateHeading>
       <p className="mt-2 text-sm">
         <Link href="/reporter" className="underline">{t('prc.change')}</Link>
@@ -80,7 +84,19 @@ export default async function ReporterPage({
       </p>
 
       {sp.saved === '1' && (
-        <p role="status" className="mt-4 rounded-lg bg-firuza-50 p-3 text-sm">{t('prc.saved')}</p>
+        <div role="status" className="mt-4 rounded-lg bg-firuza-50 p-3 text-sm">
+          <p className="font-semibold text-firuza-800">{t('prc.saved')}</p>
+          {/* На питче: сохранили с телефона — сразу показываем на сайте и в выгрузке */}
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Link href="/prices" className="inline-flex min-h-11 items-center rounded-lg bg-firuza-700 px-3 font-semibold text-white">
+              {t('rep.viewSite')}
+            </Link>
+            <a href={`/api/prices.csv?from=${date}&to=${date}&market=${encodeURIComponent(market.id)}`}
+              className="inline-flex min-h-11 items-center rounded-lg border border-firuza-700 px-3 font-semibold text-firuza-800">
+              {t('prc.csv')}
+            </a>
+          </div>
+        </div>
       )}
       <div className="mt-6">
         <PriceEntryForm
@@ -95,9 +111,13 @@ export default async function ReporterPage({
             id: p.id,
             name: pickName(p, lang),
             unit: t(productUnitKey(p.unit)),
-            value: entered[p.id] !== undefined ? String(entered[p.id]) : '',
+            value: entered[p.id] !== undefined ? String(entered[p.id]).replace('.', ',') : '',
+            last: last[p.id] ?? null,
           }))}
-          labels={{ hint: t('prc.hint'), save: t('prc.save') }}
+          labels={{
+            hint: t('prc.hint'), save: t('prc.save'), last: t('rep.last'), fillLast: t('rep.fillLast'),
+            quick: t('rep.quick'), check: t('rep.check'),
+          }}
         />
       </div>
     </div>

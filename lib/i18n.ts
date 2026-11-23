@@ -387,6 +387,11 @@ const tj = {
   'err.groupClosed': 'Ин ҷамъоварӣ дигар кушода нест',
   'err.groupAlready': 'Шумо аллакай дар ин фармоиш иштирок мекунед',
   'err.areaInvalid': 'Майдонро дуруст нависед (аз 0,1 то 100 га)',
+  'rep.last': 'Охирин',
+  'rep.fillLast': 'Нархҳои охиринро гузоштан',
+  'rep.quick': 'Танҳо нархҳои тағйирёфтаро иваз кунед — тамом.',
+  'rep.viewSite': 'Дар сайт дидан',
+  'rep.check': 'Санҷед: фарқ аз нархи охирин зиёда аз 50%',
 } as const;
 
 export type DictKey = keyof typeof tj;
@@ -766,6 +771,11 @@ const ru: Dictionary = {
   'err.groupClosed': 'Этот сбор уже закрыт',
   'err.groupAlready': 'Вы уже участвуете в этом заказе',
   'err.areaInvalid': 'Укажите площадь правильно (от 0,1 до 100 га)',
+  'rep.last': 'Было',
+  'rep.fillLast': 'Подставить прошлые цены',
+  'rep.quick': 'Поменяйте только то, что изменилось — и всё.',
+  'rep.viewSite': 'Посмотреть на сайте',
+  'rep.check': 'Проверьте: отличие от прошлой цены больше 50%',
 };
 
 const en: Dictionary = {
@@ -1142,6 +1152,11 @@ const en: Dictionary = {
   'err.groupClosed': 'This pool is closed',
   'err.groupAlready': 'You are already in this order',
   'err.areaInvalid': 'Enter a valid area (0.1 to 100 ha)',
+  'rep.last': 'Last',
+  'rep.fillLast': 'Use last prices',
+  'rep.quick': 'Change only what has changed — that\'s it.',
+  'rep.viewSite': 'View on the site',
+  'rep.check': 'Check: more than 50% off the last price',
 };
 
 /** Экспортируются для тестов полноты переводов. */

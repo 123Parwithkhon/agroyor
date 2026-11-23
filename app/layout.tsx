@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { preload } from 'react-dom';
 import { BottomNav } from '@/components/BottomNav';
+import { OfflineSupport } from '@/components/OfflineSupport';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { getCurrentUser } from '@/lib/auth-guards';
@@ -51,6 +52,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           {t('common.skipToContent')}
         </a>
+        <OfflineSupport text={t('pwa.offline')} />
         <Header lang={lang} t={t} userName={user?.name ?? null} badge={badge} />
         <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
           {children}

@@ -392,6 +392,7 @@ const tj = {
   'rep.quick': 'Танҳо нархҳои тағйирёфтаро иваз кунед — тамом.',
   'rep.viewSite': 'Дар сайт дидан',
   'rep.check': 'Санҷед: фарқ аз нархи охирин зиёда аз 50%',
+  'pwa.offline': 'Интернет нест — маълумоти охирини захирашуда нишон дода мешавад. Занг задан кор мекунад.',
 } as const;
 
 export type DictKey = keyof typeof tj;
@@ -776,6 +777,7 @@ const ru: Dictionary = {
   'rep.quick': 'Поменяйте только то, что изменилось — и всё.',
   'rep.viewSite': 'Посмотреть на сайте',
   'rep.check': 'Проверьте: отличие от прошлой цены больше 50%',
+  'pwa.offline': 'Нет интернета — показаны последние сохранённые данные. Звонок владельцу работает.',
 };
 
 const en: Dictionary = {
@@ -1157,6 +1159,7 @@ const en: Dictionary = {
   'rep.quick': 'Change only what has changed — that\'s it.',
   'rep.viewSite': 'View on the site',
   'rep.check': 'Check: more than 50% off the last price',
+  'pwa.offline': 'No internet — showing the last saved data. Calling the owner still works.',
 };
 
 /** Экспортируются для тестов полноты переводов. */

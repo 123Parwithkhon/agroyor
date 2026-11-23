@@ -13,6 +13,12 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: '#fcf8f0',
     theme_color: '#1c3376',
     lang: htmlLang(DEFAULT_LANG),
-    icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml' }],
+    // PNG 192/512 нужны Android, чтобы предложить «Установить приложение»
+    icons: [
+      { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml' },
+    ],
   };
 }

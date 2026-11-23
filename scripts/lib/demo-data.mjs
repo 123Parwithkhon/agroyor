@@ -118,3 +118,12 @@ export const DEMO_GROUPS = [
   { eq: 'niva', organizer: 6, from: 12, to: 13, qty: 2, target: 6, status: 'confirmed',
     note: 'Ҷамъоварии гандум', joins: [{ user: 2, area: 1.5 }] },
 ];
+
+/** Демо-фото (Wikimedia Commons, авторство — lib/photo-credits.ts и public/demo-photos/CREDITS.md). */
+export const DEMO_PHOTOS = {
+  mtz82: '/demo-photos/mtz82.jpg',
+  mtz1221: '/demo-photos/mtz1221.jpg',
+  umz6: '/demo-photos/umz6.jpg',
+  niva: '/demo-photos/niva.jpg',
+  t40: '/demo-photos/t40.jpg',
+};

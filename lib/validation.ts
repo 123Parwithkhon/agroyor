@@ -3,6 +3,7 @@ import { normalizePhone } from '@/lib/phone';
 import { DISTRICTS } from '@/lib/districts';
 import { EQUIPMENT_TYPES, PRICE_UNITS, PRODUCT_UNITS } from '@/lib/equipment';
 import { isWork, WORKS } from '@/lib/works';
+import { PHOTO_CREDITS } from '@/lib/photo-credits';
 
 // Сообщения — ключи словаря i18n, а не готовый текст
 const phone = z
@@ -47,6 +48,8 @@ export function fieldErrors(error: z.ZodError): Record<string, string> {
 // Фото: только Vercel Blob или локальная папка /uploads (без токена Blob, только в разработке)
 function isPhotoUrl(v: string): boolean {
   if (/^\/uploads\/[\w-]+\.(jpg|png|webp)$/.test(v)) return true;
+  // Демо-фото с указанным авторством (иначе при правке демо-объявления форма отклонила бы его фото)
+  if (v in PHOTO_CREDITS) return true;
   try {
     const u = new URL(v);
     return u.protocol === 'https:' && u.hostname.endsWith('.public.blob.vercel-storage.com');

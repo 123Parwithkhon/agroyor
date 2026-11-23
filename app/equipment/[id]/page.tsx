@@ -14,6 +14,7 @@ import BookingForm from '@/components/booking/BookingForm';
 import { getCurrentUser } from '@/lib/auth-guards';
 import { authMessages } from '@/lib/auth-messages';
 import { calendarLabels } from '@/lib/calendar-labels';
+import { photoCredit } from '@/lib/photo-credits';
 import { getT } from '@/lib/i18n-server';
 import { formatPhone, telLink, whatsappLink } from '@/lib/phone';
 import { todayInDushanbe } from '@/lib/format';
@@ -55,6 +56,7 @@ export default async function EquipmentItemPage({ params }: Props) {
   const groups = item.price_unit === 'hectare' ? await getOpenGroups(item.id, user?.id ?? null) : [];
   const msgs = await authMessages();
   const photo = item.photos[0];
+  const credit = photoCredit(photo);
   const works = item.works.filter(isWork);
   // Характеристики: показываем только заполненные владельцем
   const specs = (
@@ -76,8 +78,28 @@ export default async function EquipmentItemPage({ params }: Props) {
 
       <div className="grid gap-5 lg:grid-cols-2">
         {photo ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={photo} alt={item.title} className="aspect-[16/10] w-full rounded-2xl object-cover" />
+          <figure>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photo} alt={item.title} className="aspect-[16/10] w-full rounded-2xl object-cover" />
+            {credit && (
+              // Авторство по лицензии CC: автор, лицензия, источник, «размер уменьшен»
+              <figcaption className="mt-1 text-xs text-stone-500">
+                {t('photo.credit')} ({t('photo.example')}):{' '}
+                <a href={credit.source} target="_blank" rel="noopener noreferrer" className="underline">
+                  {credit.author}
+                </a>
+                ,{' '}
+                {credit.licenseUrl ? (
+                  <a href={credit.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">
+                    {credit.license}
+                  </a>
+                ) : (
+                  credit.license
+                )}
+                , Wikimedia Commons, {t('photo.resized')}
+              </figcaption>
+            )}
+          </figure>
         ) : (
           <EquipmentArt type={item.type} className="aspect-[16/10] w-full rounded-2xl" />
         )}
@@ -94,7 +116,7 @@ export default async function EquipmentItemPage({ params }: Props) {
             {formatMoney(item.price, lang)}
             <span className="text-base font-medium text-stone-600"> / {t(priceUnitKey(item.price_unit))}</span>
           </p>
-          <p className="inline-flex items-center gap-1 text-stone-700">
+          <p className="flex flex-wrap items-center gap-x-1 text-stone-700">
             <PinIcon className="size-5 text-anor-600" />
             {districtName(item.district, lang)}
             {item.service_radius_km && (

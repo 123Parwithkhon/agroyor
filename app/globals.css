@@ -1,0 +1,196 @@
+@import 'tailwindcss';
+
+/*
+ * Noto Sans (variable, OFL) хранится в public/fonts — сборка не зависит от Google Fonts.
+ * Браузер скачивает только нужные части по unicode-range.
+ * noto-sans-tajik — урезанный cyrillic-ext (3,5 КБ вместо 70 КБ): только Ғғ Ққ Ҳҳ Ҷҷ Ӣӣ Ӯӯ.
+ */
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/noto-sans-tajik.woff2') format('woff2');
+  unicode-range: U+0492-0493, U+049A-049B, U+04B2-04B3, U+04B6-04B7, U+04E2-04E3, U+04EE-04EF;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/noto-sans-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/noto-sans-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/*
+ * Палитра в духе Центральной Азии (Самарканд, Бухара, Истаравшан, сюзане и атлас):
+ *  lapis  — ляджувард (лазурит): шапка, подвал, заголовки;
+ *  firuza — фирӯза (бирюза куполов): основные кнопки и ссылки;
+ *  zar    — зар (золото): акценты, активные элементы на тёмном;
+ *  anor   — анор (гранат): мелкие орнаментальные детали, фокус;
+ *  sand   — тёплый кремовый фон, как старая бумага.
+ * Контраст текста проверен: белый на lapis-800 ≈ 10:1, белый на firuza-700 ≈ 5,5:1.
+ */
+@theme {
+  --font-sans: 'Noto Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --color-lapis-50: #eef2fb;
+  --color-lapis-100: #dbe3f6;
+  --color-lapis-200: #b9c7ec;
+  --color-lapis-700: #23408e;
+  --color-lapis-800: #1c3376;
+  --color-lapis-900: #152657;
+
+  --color-firuza-50: #ecfbf8;
+  --color-firuza-100: #cff3ec;
+  --color-firuza-600: #0d8b7d;
+  --color-firuza-700: #0b7266;
+  --color-firuza-800: #0a5c53;
+
+  --color-zar-50: #fdf6e7;
+  --color-zar-300: #f0cd7e;
+  --color-zar-400: #e9b44c;
+  --color-zar-500: #d4962a;
+  --color-zar-700: #8f5409;
+
+  --color-anor-50: #fdf0f3;
+  --color-anor-600: #b0183f;
+  --color-anor-700: #9a1438;
+
+  --color-sand-50: #fcf8f0;
+  --color-sand-100: #f6eedd;
+  --color-sand-200: #ead9b8;
+  --color-sand-300: #dcc395;
+}
+
+/* Полоса-орнамент в духе атласа/адраса: золотые и бирюзовые ромбы с гранатовыми точками */
+.ornament-strip {
+  height: 10px;
+  background-color: var(--color-lapis-900);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='10' viewBox='0 0 24 10'%3E%3Cpath d='M0 5L6 0l6 5-6 5z' fill='%23e9b44c'/%3E%3Cpath d='M12 5l6-5 6 5-6 5z' fill='%230d8b7d'/%3E%3Ccircle cx='12' cy='5' r='1.6' fill='%23b0183f'/%3E%3Ccircle cx='0' cy='5' r='1.6' fill='%23b0183f'/%3E%3Ccircle cx='24' cy='5' r='1.6' fill='%23b0183f'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-position: center;
+}
+
+.ornament-strip-thin {
+  height: 6px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='6' viewBox='0 0 16 6'%3E%3Cpath d='M0 3L4 0l4 3-4 3z' fill='%23e9b44c'/%3E%3Cpath d='M8 3l4-3 4 3-4 3z' fill='%230d8b7d'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+}
+
+/* Медленное вращение звезды-гирих для индикатора загрузки */
+@keyframes girih-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-girih {
+  animation: girih-spin 2.4s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-girih {
+    animation: none;
+  }
+}
+
+/*
+ * Лендинг. .full-bleed растягивает блок на всю ширину окна, хотя страница
+ * лежит внутри <main class="max-w-5xl px-4">; лишнее обрезает overflow-x: clip у body.
+ */
+.full-bleed {
+  margin-inline: calc(50% - 50vw);
+}
+
+/* Плавное появление блоков первого экрана: только transform и opacity (дёшево для слабых телефонов) */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+.rise {
+  animation: rise 0.6s ease-out both;
+}
+.rise-2 {
+  animation-delay: 0.12s;
+}
+.rise-3 {
+  animation-delay: 0.24s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
+}
+
+/* Небо на рассвете: глубокий лазурит сверху, тёплое свечение солнца у горизонта справа,
+   бирюзовый отсвет слева. Без узоров — текст на нём читается чисто. */
+.hero-sky {
+  background:
+    radial-gradient(60% 55% at 64% 100%, rgb(233 180 76 / 0.28), transparent 70%),
+    radial-gradient(45% 60% at 0% 0%, rgb(13 139 125 / 0.3), transparent 70%),
+    linear-gradient(180deg, #0d1a40 0%, #152657 55%, #23408e 100%);
+}
+
+/* Золотой градиент в акцентной строке заголовка */
+.text-gold {
+  background: linear-gradient(90deg, var(--color-zar-300), var(--color-zar-400) 60%, #f6dc9f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  /* убирает синюю вспышку при нажатии на Android */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Длинные слова и номера не вылезают за экран 320–360px */
+body {
+  overflow-wrap: break-word;
+  overflow-x: clip;
+}
+
+/* Поля ввода не меньше 16px — иначе iPhone увеличивает страницу при фокусе */
+input,
+select,
+textarea {
+  font-size: max(16px, 1em);
+}
+
+/* Без задержки двойного нажатия на кнопках и ссылках */
+a,
+button,
+label,
+summary {
+  touch-action: manipulation;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+}
+
+/* Видимый фокус для клавиатуры: гранат на светлом, золото на тёмном (шапка, подвал, герой) */
+:focus-visible {
+  outline: 3px solid var(--color-anor-600);
+  outline-offset: 2px;
+}
+.on-dark :focus-visible {
+  outline-color: var(--color-zar-400);
+}
+/* Светлая карточка внутри тёмного блока (форма поиска в герое) — снова гранатовый фокус */
+.on-dark .on-light :focus-visible {
+  outline-color: var(--color-anor-600);
+}

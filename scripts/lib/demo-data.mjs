@@ -1,0 +1,88 @@
+// Демо-данные для локальной разработки и показа (npm run db:seed -- --demo).
+// В продакшен не попадают: сид с --demo работает только с локальной PGlite.
+
+/** Пользователи (пароль у всех demo1234). Телефоны +99290000000N. */
+export const DEMO_USERS = [
+  { n: 1, name: 'Раҳимҷон Каримов', district: 'b-gafurov', roles: ['user'] },
+  { n: 2, name: 'Фарҳод Назаров', district: 'istaravshan', roles: ['user'] },
+  { n: 3, name: 'Малика Саидова', district: 'khujand', roles: ['user', 'reporter'] },
+  { n: 4, name: 'Ҷамшед Раҳимов', district: 'isfara', roles: ['user'] },
+  { n: 5, name: 'Зарина Ҳасанова', district: 'konibodom', roles: ['user'] },
+  { n: 6, name: 'Баҳтиёр Юсупов', district: 'spitamen', roles: ['user'] },
+  { n: 7, name: 'Шоҳрух Аминов', district: 'j-rasulov', roles: ['user'] },
+  { n: 8, name: 'Дилноза Қодирова', district: 'zafarobod', roles: ['user'] },
+  { n: 9, name: 'Абдуллоҳ Шарипов', district: 'panjakent', roles: ['user'] },
+];
+
+/**
+ * Объявления: owner — номер пользователя (n). key — для ссылок из броней ниже.
+ * Названия — как пишут сами владельцы (марка/модель), описания — по-таджикски.
+ */
+export const DEMO_EQUIPMENT = [
+  { key: 'mtz82', owner: 1, type: 'tractor', title: 'Трактор МТЗ-82', district: 'b-gafurov', price: 350, unit: 'hectare', op: true,
+    description: 'Трактори МТЗ-82 бо плуг ва борона. Шудгор ва тайёр кардани замин барои кишт.\nМеханизатори ботаҷриба, 15 сол кор.' },
+  { key: 'kps4', owner: 1, type: 'cultivator', title: 'Культиватор КПС-4', district: 'b-gafurov', price: 200, unit: 'day', op: false,
+    description: 'Барои нарм кардани хок ва нест кардани алафҳои бегона. Ба трактори МТЗ мувофиқ аст.' },
+  { key: 'neva', owner: 2, type: 'motoblock', title: 'Мотоблок Нева', district: 'istaravshan', price: 40, unit: 'hour', op: false,
+    description: 'Барои замини хурд, боғ ва полиз. Бо фреза ва плуги хурд. Сӯзишворӣ аз иҷорагир.' },
+  { key: 'sz36', owner: 2, type: 'seeder', title: 'Сеялка СЗ-3.6', district: 'istaravshan', price: 250, unit: 'hectare', op: true,
+    description: 'Тухмипошии гандум ва ҷав. Ҳамроҳ бо трактор ва механизатор.' },
+  { key: 'op2000', owner: 2, type: 'sprayer', title: 'Опрыскиватель ОП-2000', district: 'istaravshan', price: 300, unit: 'day', op: true,
+    description: 'Обпошӣ ва дорупошии боғ ва киштзор. Зарфи 2000 литр, бар 18 метр.' },
+  { key: 'pts4', owner: 1, type: 'trailer', title: 'Прицеп 2ПТС-4', district: 'b-gafurov', price: 150, unit: 'day', op: false,
+    description: 'Барои кашонидани ҳосил, пору ва бор. То 4 тонна.' },
+  { key: 'niva', owner: 4, type: 'harvester', title: 'Комбайн Нива СК-5', district: 'isfara', price: 900, unit: 'hectare', op: true,
+    description: 'Ҷамъоварии гандум ва ҷав. Механизатор ва сӯзишворӣ дар нарх дохил аст.' },
+  { key: 'mtz1221', owner: 4, type: 'tractor', title: 'Трактор Беларус 1221', district: 'isfara', price: 450, unit: 'hectare', op: true,
+    description: 'Трактори пурқувват барои шудгори чуқур ва заминҳои калон.' },
+  { key: 't40', owner: 5, type: 'drone', title: 'Дрон DJI Agras T40', district: 'konibodom', price: 120, unit: 'hectare', op: true,
+    description: 'Дорупошӣ бо дрон: тез, баробар ва бе зарар ба киштзор. То 40 гектар дар як рӯз.' },
+  { key: 'zubr', owner: 5, type: 'motoblock', title: 'Мотоблок Зубр JR-Q12', district: 'konibodom', price: 35, unit: 'hour', op: false,
+    description: 'Мотоблоки сабук бо фреза. Барои полиз ва гармхона.' },
+  { key: 'umz6', owner: 6, type: 'tractor', title: 'Трактор ЮМЗ-6', district: 'spitamen', price: 300, unit: 'hectare', op: true,
+    description: 'Шудгор, кишт ва кашонидани бор. Трактор дар ҳолати хуб.' },
+  { key: 'pump', owner: 6, type: 'other', title: 'Насоси обёрӣ (дизелӣ)', district: 'spitamen', price: 80, unit: 'day', op: false,
+    description: 'Насоси дизелӣ барои обёрии замин аз ҷӯй ва чоҳ. Шлангҳо 50 метр.' },
+  { key: 'pts2', owner: 9, type: 'trailer', title: 'Прицеп 1ПТС-2', district: 'panjakent', price: 100, unit: 'day', op: false,
+    description: 'Ядаки хурд барои мева ва сабзавот.' },
+  { key: 'backpack', owner: 9, type: 'sprayer', title: 'Опрыскиватель ранцевый', district: 'panjakent', price: 25, unit: 'day', op: false,
+    description: 'Дорупошаки дастӣ барои боғ ва токзор. 16 литр.' },
+];
+
+/**
+ * Брони относительно сегодняшнего дня (from/to — смещение в днях).
+ * У завершённых (done) — отзывы обеих сторон.
+ */
+export const DEMO_BOOKINGS = [
+  { eq: 'mtz82', renter: 7, from: -40, to: -38, status: 'done', note: 'Шудгори 3 гектар',
+    reviews: [
+      { by: 'renter', rating: 5, text: 'Шудгор хеле хуб шуд, механизатор ботаҷриба ва сари вақт омад.' },
+      { by: 'owner', rating: 5, text: 'Мизоҷи хуб, пулро сари вақт дод.' },
+    ] },
+  { eq: 't40', renter: 8, from: -25, to: -25, status: 'done', note: 'Дорупошии пахта',
+    reviews: [
+      { by: 'renter', rating: 5, text: 'Дрон хеле тез кор кард! 12 гектарро дар ним рӯз пошид.' },
+    ] },
+  { eq: 'niva', renter: 5, from: -60, to: -58, status: 'done', note: 'Ҷамъоварии гандум',
+    reviews: [
+      { by: 'renter', rating: 4, text: 'Комбайн хуб, вале як рӯз дертар омад.' },
+      { by: 'owner', rating: 5, text: 'Ҳама чиз хуб гузашт.' },
+    ] },
+  { eq: 'neva', renter: 8, from: -15, to: -14, status: 'done', note: '',
+    reviews: [
+      { by: 'renter', rating: 5, text: 'Барои полизи хурд беҳтарин. Тавсия медиҳам.' },
+    ] },
+  { eq: 'umz6', renter: 7, from: -20, to: -19, status: 'done', note: '',
+    reviews: [
+      { by: 'renter', rating: 4, text: 'Трактор кӯҳна, вале бе мушкил кор кард.' },
+    ] },
+  { eq: 'mtz82', renter: 8, from: 3, to: 5, status: 'confirmed', note: 'Шудгори баҳорӣ' },
+  { eq: 't40', renter: 7, from: 7, to: 7, status: 'confirmed', note: '' },
+  { eq: 'sz36', renter: 5, from: 10, to: 12, status: 'confirmed', note: 'Кишти гандум' },
+  { eq: 'mtz82', renter: 5, from: 8, to: 9, status: 'pending', note: 'Агар имкон бошад, субҳи барвақт' },
+  { eq: 'mtz1221', renter: 7, from: 2, to: 3, status: 'pending', note: '' },
+  { eq: 'op2000', renter: 9, from: -5, to: -5, status: 'rejected', note: '' },
+];
+
+/** Базовые цены (сомони за единицу) и разница рынков: Хуҷанд дороже, Исфара дешевле. */
+export const MARKET_FACTORS = [1.06, 1.0, 0.96];

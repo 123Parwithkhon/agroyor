@@ -107,3 +107,14 @@ export const DEMO_SPECS = {
   pts2: { radius: 30 },
   backpack: { works: ['spraying'], radius: 5 },
 };
+
+/**
+ * Демо «совместных заказов» (складчина): организатор бронирует со своей площадью и целью,
+ * соседи присоединяются. Дрон: 1,5 + 1 + 0,5 = 3 из 5 га в Бободжон Гафурове — осталось 2 га.
+ */
+export const DEMO_GROUPS = [
+  { eq: 't40', organizer: 1, from: 6, to: 6, qty: 1.5, target: 5, status: 'pending',
+    note: 'Дорупошии боғҳо — ҳамсояҳо, ҳамроҳ шавед!', joins: [{ user: 7, area: 1 }, { user: 9, area: 0.5 }] },
+  { eq: 'niva', organizer: 6, from: 12, to: 13, qty: 2, target: 6, status: 'confirmed',
+    note: 'Ҷамъоварии гандум', joins: [{ user: 2, area: 1.5 }] },
+];

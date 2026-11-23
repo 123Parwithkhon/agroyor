@@ -25,6 +25,7 @@ type Props = {
     calcTitle: string; qty: string; total: string; busy: string; note: string; pickHint: string;
     unitDays: string; unitHa: string; unitHours: string;
     calBusy: string; calFree: string; calSelected: string;
+    groupOpen: string; groupHint: string; groupTarget: string;
   };
 };
 
@@ -38,6 +39,7 @@ export default function BookingForm({ action, msgs, lang, today, price, unit, bo
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, null);
   const [sel, setSel] = useState({ start: state?.values?.startDate ?? '', end: state?.values?.endDate ?? '' });
   const [qtyRaw, setQtyRaw] = useState(state?.values?.qty ?? '');
+  const [group, setGroup] = useState(state?.values?.group === 'on');
   const m = (key?: string) => (key ? (msgs[key] ?? msgs['err.generic']) : undefined);
   const f = state?.fields;
 
@@ -90,7 +92,26 @@ export default function BookingForm({ action, msgs, lang, today, price, unit, bo
             <label htmlFor="f-qty" className="block text-sm font-medium">{labels.qty}</label>
             <input id="f-qty" name="qty" type="text" inputMode="decimal" value={qtyRaw}
               onChange={(e) => setQtyRaw(e.target.value)} className={control} aria-invalid={qtyBad} />
-            {qtyBad && <p role="alert" className="text-sm text-anor-700">{m('err.qtyInvalid')}</p>}
+            {(qtyBad || f?.qty) && <p role="alert" className="text-sm text-anor-700">{m(f?.qty ?? 'err.qtyInvalid')}</p>}
+          </div>
+        )}
+
+        {/* Складчина: только для оплаты за гектар — каждый сосед платит за свои гектары */}
+        {unit === 'hectare' && (
+          <div className="space-y-2 rounded-lg border border-firuza-600 bg-firuza-50 p-3">
+            <label className="flex min-h-11 items-center gap-3 font-semibold text-firuza-800">
+              <input type="checkbox" name="group" checked={group} onChange={(e) => setGroup(e.target.checked)} className="size-5" />
+              {labels.groupOpen}
+            </label>
+            <p className="text-xs text-stone-700">{labels.groupHint}</p>
+            {group && (
+              <div className="space-y-1">
+                <label htmlFor="f-groupTarget" className="block text-sm font-medium">{labels.groupTarget}</label>
+                <input id="f-groupTarget" name="groupTarget" inputMode="decimal" required
+                  defaultValue={state?.values?.groupTarget ?? '5'} className={control} />
+                {f?.groupTarget && <p role="alert" className="text-sm text-anor-700">{m(f.groupTarget)}</p>}
+              </div>
+            )}
           </div>
         )}
 

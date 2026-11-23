@@ -48,6 +48,19 @@ export default function BookingItem({
       <p className="text-sm text-stone-600">
         {role === 'renter' ? t('bk.owner') : t('bk.renter')}: {b.other_name}
       </p>
+      {b.qty !== null && b.price_unit !== 'day' && (
+        <p className="text-sm text-stone-700">
+          {b.price_unit === 'hectare' ? t('calc.qtyHa') : t('calc.qtyHours')}: <b>{b.qty}</b>
+        </p>
+      )}
+      {b.group_open && b.group_target_ha !== null && (
+        <p className="mt-1 rounded-lg bg-firuza-50 px-2 py-1 text-sm font-medium text-firuza-800">
+          {t('group.ownerSummary')
+            .replace('{collected}', String(Math.round(((b.qty ?? 0) + b.group_joined_ha) * 100) / 100))
+            .replace('{target}', String(b.group_target_ha))
+            .replace('{members}', String(b.group_members))}
+        </p>
+      )}
       {b.comment && <p className="mt-1 text-sm">{b.comment}</p>}
 
       {b.other_phone && (

@@ -1,6 +1,6 @@
 // Начальные данные: рынки, продукты, админ из ADMIN_PHONE/ADMIN_PASSWORD.
 // Флаг --demo (только для локальной PGlite) добавляет демо-пользователей, технику и цены за 30 дней.
-import { DEMO_BOOKINGS, DEMO_EQUIPMENT, DEMO_SPECS, DEMO_USERS, MARKET_FACTORS } from './lib/demo-data.mjs';
+import { DEMO_BOOKINGS, DEMO_EQUIPMENT, DEMO_GROUPS, DEMO_SPECS, DEMO_USERS, MARKET_FACTORS } from './lib/demo-data.mjs';
 import { connectForScript } from './lib/local-db.mjs';
 import { todayInDushanbe } from '../lib/format.ts';
 import { hashPassword } from '../lib/password.ts';
@@ -163,6 +163,23 @@ async function seedDemoBookings(userIds, equipmentIds) {
   console.log(`✔ Демо-брони: ${DEMO_BOOKINGS.length}, отзывы: ${reviews}`);
 }
 
+async function seedDemoGroups(userIds, equipmentIds) {
+  const [{ count }] = await sql`SELECT count(*)::int AS count FROM bookings WHERE group_open`;
+  if (count > 0) return console.log('Демо-складчины уже есть — пропускаю');
+  for (const g of DEMO_GROUPS) {
+    const [b] = await sql`
+      INSERT INTO bookings (equipment_id, renter_id, start_date, end_date, status, note, qty, group_open, group_target_ha, decided_at)
+      VALUES (${equipmentIds.get(g.eq)}, ${userIds.get(g.organizer)}, ${dayOffset(g.from)}, ${dayOffset(g.to)},
+              ${g.status}, ${g.note}, ${g.qty}, true, ${g.target},
+              ${g.status === 'confirmed' ? dayOffset(-1) : null}::timestamptz)
+      RETURNING id`;
+    for (const j of g.joins) {
+      await sql`INSERT INTO booking_joins (booking_id, user_id, area_ha) VALUES (${b.id}, ${userIds.get(j.user)}, ${j.area})`;
+    }
+  }
+  console.log(`✔ Демо-складчины: ${DEMO_GROUPS.length}`);
+}
+
 async function seedDemoPrices(reporterId) {
   const markets = await sql`SELECT id FROM markets ORDER BY id`;
   const products = await sql`SELECT id, sort_order FROM products ORDER BY sort_order`;
@@ -193,6 +210,7 @@ async function seedDemo() {
   const userIds = await seedDemoUsers(hash);
   const equipmentIds = await seedDemoEquipment(userIds);
   await seedDemoBookings(userIds, equipmentIds);
+  await seedDemoGroups(userIds, equipmentIds);
   await seedDemoPrices(userIds.get(3));
 }
 

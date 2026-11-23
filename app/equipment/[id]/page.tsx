@@ -17,7 +17,8 @@ import { calendarLabels } from '@/lib/calendar-labels';
 import { getT } from '@/lib/i18n-server';
 import { formatPhone, telLink, whatsappLink } from '@/lib/phone';
 import { todayInDushanbe } from '@/lib/format';
-import { getBookedRanges } from '@/lib/queries/bookings';
+import { getBookedRanges, getOpenGroups } from '@/lib/queries/bookings';
+import { GroupOrders } from '@/components/booking/GroupOrders';
 import { getEquipment, getUserReviews } from '@/lib/queries/equipment';
 import { createBookingAction } from './actions';
 
@@ -51,6 +52,8 @@ export default async function EquipmentItemPage({ params }: Props) {
   const isOwner = user?.id === String(item.owner_id);
   const today = todayInDushanbe();
   const calendar = calendarLabels(today, lang);
+  const groups = item.price_unit === 'hectare' ? await getOpenGroups(item.id, user?.id ?? null) : [];
+  const msgs = await authMessages();
   const photo = item.photos[0];
   const works = item.works.filter(isWork);
   // Характеристики: показываем только заполненные владельцем
@@ -151,13 +154,26 @@ export default async function EquipmentItemPage({ params }: Props) {
         </div>
       </div>
 
+      {item.price_unit === 'hectare' && (
+        <GroupOrders
+          groups={groups}
+          equipmentId={item.id}
+          pricePerHa={item.price}
+          lang={lang}
+          t={t}
+          userId={user?.id ?? null}
+          isOwner={isOwner}
+          msgs={msgs}
+        />
+      )}
+
       {/* Бронирование: календарь занятых дней, выбор дат и расчёт стоимости */}
       <section className="flex flex-col gap-4">
         <OrnateHeading>{t('bk.title')}</OrnateHeading>
         {user && !isOwner ? (
           <BookingForm
             action={createBookingAction.bind(null, String(item.id))}
-            msgs={await authMessages()}
+            msgs={msgs}
             lang={lang}
             today={today}
             price={item.price}
@@ -171,6 +187,7 @@ export default async function EquipmentItemPage({ params }: Props) {
               qty: item.price_unit === 'hectare' ? t('calc.qtyHa') : t('calc.qtyHours'),
               unitDays: t('calc.days'), unitHa: t('calc.ha'), unitHours: t('calc.hours'),
               calBusy: t('bk.busy'), calFree: t('calc.free'), calSelected: t('calc.selected'),
+              groupOpen: t('group.open'), groupHint: t('group.openHint'), groupTarget: t('group.target'),
             }}
           />
         ) : (

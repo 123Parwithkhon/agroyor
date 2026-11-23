@@ -44,3 +44,29 @@ export async function searchEquipment(f: CatalogFilters): Promise<{ items: Equip
   `;
   return { items, total: n };
 }
+
+export type MapItem = {
+  id: number;
+  type: EquipmentType;
+  title: string;
+  district: string;
+  price: number;
+  price_unit: 'day' | 'hour' | 'hectare';
+  service_radius_km: number | null;
+};
+
+/** Техника для карты: те же фильтры, что в каталоге, без постраничного деления (до 300 точек). */
+export async function searchEquipmentForMap(f: Omit<CatalogFilters, 'sort' | 'page'>): Promise<MapItem[]> {
+  const sql = db();
+  return sql<MapItem[]>`
+    SELECT e.id, e.type, e.title, e.district, e.price, e.price_unit, e.service_radius_km
+    FROM equipment e JOIN users u ON u.id = e.owner_id
+    WHERE e.active AND NOT e.hidden_by_admin AND NOT u.blocked
+      ${f.type ? sql`AND e.type = ${f.type}` : sql``}
+      ${f.work ? sql`AND ${f.work} = ANY(e.works)` : sql``}
+      ${f.district ? sql`AND e.district = ${f.district}` : sql``}
+      ${f.operator ? sql`AND e.with_operator` : sql``}
+    ORDER BY e.created_at DESC
+    LIMIT 300
+  `;
+}

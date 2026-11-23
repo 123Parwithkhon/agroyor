@@ -396,6 +396,15 @@ const tj = {
   'photo.credit': 'Сурат',
   'photo.resized': 'андозааш хурд карда шуд',
   'photo.example': 'сурати намунавӣ',
+  'map.list': 'Рӯйхат',
+  'map.map': 'Харита',
+  'map.view': 'Намуди нишондиҳӣ',
+  'map.priceOf': 'Нархи рӯз дар бозорҳо',
+  'map.approx': 'Ҷойгиршавии техника тахминӣ аст — аз рӯи маркази ноҳия. Доира — масофаи хизмат.',
+  'map.found': 'Техника дар харита',
+  'map.open': 'Кушодан',
+  'map.market': 'Бозор',
+  'map.error': 'Харита бор нашуд — интернетро санҷед.',
 } as const;
 
 export type DictKey = keyof typeof tj;
@@ -784,6 +793,15 @@ const ru: Dictionary = {
   'photo.credit': 'Фото',
   'photo.resized': 'размер уменьшен',
   'photo.example': 'фото для примера',
+  'map.list': 'Список',
+  'map.map': 'Карта',
+  'map.view': 'Вид отображения',
+  'map.priceOf': 'Цена дня на рынках',
+  'map.approx': 'Расположение техники примерное — по центру района. Круг — радиус выезда.',
+  'map.found': 'Техники на карте',
+  'map.open': 'Открыть',
+  'map.market': 'Рынок',
+  'map.error': 'Карта не загрузилась — проверьте интернет.',
 };
 
 const en: Dictionary = {
@@ -1169,6 +1187,15 @@ const en: Dictionary = {
   'photo.credit': 'Photo',
   'photo.resized': 'resized',
   'photo.example': 'example photo',
+  'map.list': 'List',
+  'map.map': 'Map',
+  'map.view': 'View',
+  'map.priceOf': 'Price of the day at markets',
+  'map.approx': 'Equipment locations are approximate — by district centre. Circle — service radius.',
+  'map.found': 'Equipment on the map',
+  'map.open': 'Open',
+  'map.market': 'Market',
+  'map.error': 'The map did not load — check your connection.',
 };
 
 /** Экспортируются для тестов полноты переводов. */

@@ -20,6 +20,11 @@ export type EquipmentDetails = EquipmentListItem & {
   description: string;
   owner_id: number;
   owner_phone: string;
+  works: string[];
+  work_width_m: number | null;
+  fuel_l_per_h: number | null;
+  power_hp: number | null;
+  service_radius_km: number | null;
 };
 
 export type Review = {
@@ -55,6 +60,7 @@ export async function getEquipment(id: number): Promise<EquipmentDetails | null>
   const [row] = await sql<EquipmentDetails[]>`
     SELECT e.id, e.type, e.title, e.description, e.district, e.price, e.price_unit, e.with_operator,
            e.photos, e.owner_id, u.name AS owner_name, u.phone AS owner_phone,
+           e.works, e.work_width_m, e.fuel_l_per_h, e.power_hp, e.service_radius_km,
            r.avg AS owner_rating, coalesce(r.count, 0) AS owner_reviews
     FROM equipment e
     JOIN users u ON u.id = e.owner_id

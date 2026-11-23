@@ -24,6 +24,32 @@ type Flat = {
 };
 
 /**
+ * Мини-график для таблицы: средняя по рынкам цена каждого продукта за 7 дней до date (включительно).
+ * Дни без цен пропускаются. Ключ — id продукта.
+ */
+export async function getWeekTrend(date: string): Promise<Record<number, number[]>> {
+  const rows = await db()<{ product_id: number; avg: number }[]>`
+    SELECT product_id, round(avg(price), 2) AS avg
+    FROM prices
+    WHERE date BETWEEN ${date}::date - 6 AND ${date}::date
+    GROUP BY product_id, date
+    ORDER BY product_id, date`;
+  const out: Record<number, number[]> = {};
+  for (const r of rows) (out[r.product_id] ??= []).push(r.avg);
+  return out;
+}
+
+/** Самая дешёвая доступная техника для перевозки за день (для калькулятора выгоды); null — нет такой. */
+export async function getCheapestTransportPerDay(): Promise<number | null> {
+  const [row] = await db()<{ price: number | null }[]>`
+    SELECT min(e.price) AS price
+    FROM equipment e JOIN users u ON u.id = e.owner_id
+    WHERE e.active AND NOT e.hidden_by_admin AND NOT u.blocked
+      AND e.price_unit = 'day' AND 'transport' = ANY(e.works)`;
+  return row?.price ?? null;
+}
+
+/**
  * Таблица цен «продукт × рынок» на последнюю дату с данными, не позже onDate.
  * Для каждой цены — предыдущая известная цена того же рынка (для стрелки к прошлому дню).
  */

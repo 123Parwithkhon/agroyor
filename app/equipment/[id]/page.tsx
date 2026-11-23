@@ -7,11 +7,13 @@ import { GirihStar, OrnateHeading } from '@/components/ornaments';
 import { Rating } from '@/components/Rating';
 import { districtName } from '@/lib/districts';
 import { priceUnitKey, typeKey } from '@/lib/equipment';
-import { formatDate, formatMoney } from '@/lib/format';
+import { formatAmount, formatDate, formatMoney } from '@/lib/format';
+import { isWork, workKey } from '@/lib/works';
 import BookingCalendar from '@/components/booking/BookingCalendar';
 import BookingForm from '@/components/booking/BookingForm';
 import { getCurrentUser } from '@/lib/auth-guards';
 import { authMessages } from '@/lib/auth-messages';
+import { calendarLabels } from '@/lib/calendar-labels';
 import { getT } from '@/lib/i18n-server';
 import { formatPhone, telLink, whatsappLink } from '@/lib/phone';
 import { todayInDushanbe } from '@/lib/format';
@@ -48,7 +50,19 @@ export default async function EquipmentItemPage({ params }: Props) {
   const user = await getCurrentUser();
   const isOwner = user?.id === String(item.owner_id);
   const today = todayInDushanbe();
+  const calendar = calendarLabels(today, lang);
   const photo = item.photos[0];
+  const works = item.works.filter(isWork);
+  // Характеристики: показываем только заполненные владельцем
+  const specs = (
+    [
+      [t('eq.width'), item.work_width_m],
+      [t('eq.fuel'), item.fuel_l_per_h],
+      [t('eq.power'), item.power_hp],
+    ] as const
+  )
+    .filter((s): s is readonly [string, number] => s[1] !== null)
+    .map(([label, value]) => [label, formatAmount(value, lang)] as const);
 
   return (
     <article className="flex flex-col gap-5">
@@ -80,7 +94,31 @@ export default async function EquipmentItemPage({ params }: Props) {
           <p className="inline-flex items-center gap-1 text-stone-700">
             <PinIcon className="size-5 text-anor-600" />
             {districtName(item.district, lang)}
+            {item.service_radius_km && (
+              <span className="text-stone-500">· {t('eq.radius')}: {item.service_radius_km}</span>
+            )}
           </p>
+          {works.length > 0 && (
+            <ul className="flex flex-wrap gap-1.5" aria-label={t('eq.work')}>
+              {works.map((w) => (
+                <li key={w}>
+                  <Link href={`/equipment?work=${w}`} className="inline-flex min-h-8 items-center rounded-full border border-firuza-600 px-2.5 text-sm text-firuza-800 hover:bg-firuza-50">
+                    {t(workKey(w))}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+          {specs.length > 0 && (
+            <dl className="grid grid-cols-2 gap-x-3 gap-y-1 rounded-xl border border-sand-200 bg-white p-3 text-sm">
+              {specs.map(([label, value]) => (
+                <div key={label} className="contents">
+                  <dt className="text-stone-600">{label}</dt>
+                  <dd className="text-right font-semibold tabular-nums">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
 
           {/* Владелец и связь с ним */}
           <div className="rounded-xl border border-sand-200 bg-white p-4">
@@ -113,41 +151,52 @@ export default async function EquipmentItemPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Бронирование: календарь занятых дней и форма заявки */}
+      {/* Бронирование: календарь занятых дней, выбор дат и расчёт стоимости */}
       <section className="flex flex-col gap-4">
         <OrnateHeading>{t('bk.title')}</OrnateHeading>
-        <div className="grid gap-5 lg:grid-cols-2">
-          <div className="rounded-xl border border-sand-200 bg-white p-4">
-            <BookingCalendar booked={booked} today={today} lang={lang} labels={{ busy: t('bk.busy') }} />
+        {user && !isOwner ? (
+          <BookingForm
+            action={createBookingAction.bind(null, String(item.id))}
+            msgs={await authMessages()}
+            lang={lang}
+            today={today}
+            price={item.price}
+            unit={item.price_unit}
+            booked={booked}
+            calendar={calendar}
+            labels={{
+              start: t('bk.start'), end: t('bk.end'), comment: t('bk.comment'), submit: t('bk.submit'),
+              calcTitle: t('calc.title'), total: t('calc.total'), busy: t('calc.busy'), note: t('calc.note'),
+              pickHint: t('calc.pickHint'),
+              qty: item.price_unit === 'hectare' ? t('calc.qtyHa') : t('calc.qtyHours'),
+              unitDays: t('calc.days'), unitHa: t('calc.ha'), unitHours: t('calc.hours'),
+              calBusy: t('bk.busy'), calFree: t('calc.free'), calSelected: t('calc.selected'),
+            }}
+          />
+        ) : (
+          <div className="grid gap-5 lg:grid-cols-2">
+            <div className="rounded-xl border border-sand-200 bg-white p-4">
+              <BookingCalendar
+                labels={calendar}
+                booked={booked}
+                today={today}
+                text={{ busy: t('bk.busy'), free: t('calc.free'), selected: t('calc.selected') }}
+              />
+            </div>
+            <div className="flex items-center justify-center rounded-xl border border-sand-200 bg-white p-4">
+              {isOwner ? (
+                <p className="text-center text-stone-600">{t('bk.ownHint')}</p>
+              ) : (
+                <Link
+                  href={`/login?next=${encodeURIComponent(`/equipment/${item.id}`)}`}
+                  className="flex min-h-14 w-full items-center justify-center rounded-xl bg-firuza-700 px-4 text-center font-semibold text-white hover:bg-firuza-800"
+                >
+                  {t('bk.loginToBook')}
+                </Link>
+              )}
+            </div>
           </div>
-          <div className="rounded-xl border border-sand-200 bg-white p-4">
-            {!user ? (
-              <Link
-                href={`/login?next=${encodeURIComponent(`/equipment/${item.id}`)}`}
-                className="flex min-h-14 items-center justify-center rounded-xl bg-firuza-700 px-4 text-center font-semibold text-white hover:bg-firuza-800"
-              >
-                {t('bk.loginToBook')}
-              </Link>
-            ) : isOwner ? (
-              <p className="text-center text-stone-600">{t('bk.ownHint')}</p>
-            ) : (
-              <BookingForm
-              action={createBookingAction.bind(null, id)}
-              msgs={msgs}
-              today={today}
-              price={item.price}
-              mode={item.price_unit === 'ha' ? 'ha' : item.price_unit === 'hour' ? 'hour' : 'day'}
-              booked={booked}
-              labels={{
-                start: t('bk.start'), end: t('bk.end'), comment: t('bk.comment'), submit: t('bk.submit'),
-                calcTitle: t('calc.title'), calcDays: t('calc.days'),
-                qty: item.price_unit === 'ha' ? t('calc.qtyHa') : t('calc.qtyHours'),
-                total: t('calc.total'), busy: t('calc.busy'), note: t('calc.note'),
-              }}
-            />
-            )}
-          </div>
-        </div>
+        )}
       </section>
 
       {item.description && (

@@ -2,11 +2,14 @@ import 'server-only';
 import { db } from '@/lib/db';
 import type { EquipmentType } from '@/lib/equipment';
 import type { EquipmentListItem } from '@/lib/queries/equipment';
+import type { Work } from '@/lib/works';
 
 export const PAGE_SIZE = 12;
 
 export type CatalogFilters = {
   type?: EquipmentType;
+  /** Вид работ: фермер ищет по задаче («вспашка»), а не по модели трактора */
+  work?: Work;
   district?: string;
   operator: boolean;
   sort: 'new' | 'cheap';
@@ -18,6 +21,7 @@ export async function searchEquipment(f: CatalogFilters): Promise<{ items: Equip
   const sql = db();
   const where = sql`e.active AND NOT e.hidden_by_admin AND NOT u.blocked
     ${f.type ? sql`AND e.type = ${f.type}` : sql``}
+    ${f.work ? sql`AND ${f.work} = ANY(e.works)` : sql``}
     ${f.district ? sql`AND e.district = ${f.district}` : sql``}
     ${f.operator ? sql`AND e.with_operator` : sql``}`;
   const order = f.sort === 'cheap' ? sql`e.price ASC, e.created_at DESC, e.id DESC` : sql`e.created_at DESC, e.id DESC`;

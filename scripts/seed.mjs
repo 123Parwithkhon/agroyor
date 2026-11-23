@@ -1,10 +1,11 @@
 // Начальные данные: рынки, продукты, админ из ADMIN_PHONE/ADMIN_PASSWORD.
 // Флаг --demo (только для локальной PGlite) добавляет демо-пользователей, технику и цены за 30 дней.
-import { DEMO_BOOKINGS, DEMO_EQUIPMENT, DEMO_USERS, MARKET_FACTORS } from './lib/demo-data.mjs';
+import { DEMO_BOOKINGS, DEMO_EQUIPMENT, DEMO_SPECS, DEMO_USERS, MARKET_FACTORS } from './lib/demo-data.mjs';
 import { connectForScript } from './lib/local-db.mjs';
 import { todayInDushanbe } from '../lib/format.ts';
 import { hashPassword } from '../lib/password.ts';
 import { normalizePhone } from '../lib/phone.ts';
+import { resolveWorks } from '../lib/works.ts';
 
 const PLACEHOLDER_PASSWORD = 'change-me-please';
 
@@ -120,6 +121,15 @@ async function seedDemoEquipment(userIds) {
       RETURNING id`;
     ids.set(e.key, row.id);
     added++;
+  }
+  // Виды работ (как в приложении: не указаны — по виду техники) и характеристики
+  for (const e of DEMO_EQUIPMENT) {
+    const s = DEMO_SPECS[e.key] ?? {};
+    await sql`
+      UPDATE equipment SET works = ${resolveWorks(s.works ?? [], e.type)},
+        work_width_m = ${s.width ?? null}, fuel_l_per_h = ${s.fuel ?? null},
+        power_hp = ${s.power ?? null}, service_radius_km = ${s.radius ?? null}
+      WHERE id = ${ids.get(e.key)}`;
   }
   console.log(`✔ Демо-техника: ${DEMO_EQUIPMENT.length} (новых ${added})`);
   return ids;

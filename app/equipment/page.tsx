@@ -5,10 +5,11 @@ import { DISTRICTS } from '@/lib/districts';
 import { EQUIPMENT_TYPES, typeKey, type EquipmentType } from '@/lib/equipment';
 import { getT, pageMetadata } from '@/lib/i18n-server';
 import { PAGE_SIZE, searchEquipment } from '@/lib/queries/equipment-search';
+import { isWork, WORKS, workKey } from '@/lib/works';
 
 export const generateMetadata = () => pageMetadata('page.equipment');
 
-type SP = { type?: string; district?: string; operator?: string; sort?: string; page?: string };
+type SP = { type?: string; work?: string; district?: string; operator?: string; sort?: string; page?: string };
 
 function isType(v: string | undefined): v is EquipmentType {
   return (EQUIPMENT_TYPES as readonly string[]).includes(v ?? '');
@@ -20,17 +21,19 @@ export default async function EquipmentPage({ searchParams }: { searchParams: Pr
   const { lang, t } = await getT();
 
   const type = isType(sp.type) ? sp.type : undefined;
+  const work = isWork(sp.work) ? sp.work : undefined;
   const district = DISTRICTS.some((d) => d.code === sp.district) ? sp.district : undefined;
   const operator = sp.operator === '1';
   const sort = sp.sort === 'cheap' ? 'cheap' : 'new';
   const page = Math.max(1, Math.min(1000, Number.parseInt(sp.page ?? '1', 10) || 1));
 
-  const { items, total } = await searchEquipment({ type, district, operator, sort, page });
+  const { items, total } = await searchEquipment({ type, work, district, operator, sort, page });
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const link = (p: number) => {
     const q = new URLSearchParams();
     if (type) q.set('type', type);
+    if (work) q.set('work', work);
     if (district) q.set('district', district);
     if (operator) q.set('operator', '1');
     if (sort === 'cheap') q.set('sort', 'cheap');
@@ -46,7 +49,14 @@ export default async function EquipmentPage({ searchParams }: { searchParams: Pr
     <div className="flex flex-col gap-6">
       <OrnateHeading as="h1">{t('page.equipment')}</OrnateHeading>
 
-      <form className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" role="search">
+      <form className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5" role="search">
+        {/* Вид работ — первым: фермеру проще искать по задаче, чем по модели техники */}
+        <select name="work" defaultValue={work ?? ''} aria-label={t('eq.work')} className={control}>
+          <option value="">{t('eq.work')}: {t('eq.filterAll')}</option>
+          {WORKS.map((w) => (
+            <option key={w} value={w}>{t(workKey(w))}</option>
+          ))}
+        </select>
         <select name="type" defaultValue={type ?? ''} aria-label={t('eq.kind')} className={control}>
           <option value="">{t('eq.kind')}: {t('eq.filterAll')}</option>
           {EQUIPMENT_TYPES.map((k) => (
@@ -69,7 +79,7 @@ export default async function EquipmentPage({ searchParams }: { searchParams: Pr
         </label>
         <button
           type="submit"
-          className="min-h-11 rounded-lg bg-firuza-700 px-4 font-semibold text-white hover:bg-firuza-800 sm:col-span-2 lg:col-span-4"
+          className="min-h-11 rounded-lg bg-firuza-700 px-4 font-semibold text-white hover:bg-firuza-800 sm:col-span-2 lg:col-span-5"
         >
           {t('eq.filterApply')}
         </button>

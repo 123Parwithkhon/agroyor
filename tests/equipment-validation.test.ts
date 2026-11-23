@@ -44,3 +44,19 @@ test('equipmentSchema отклоняет чужие адреса фото и б�
   assert.equal(equipmentSchema.safeParse({ ...ok, photos: Array(6).fill('/uploads/a.jpg') }).success, false);
   assert.equal(equipmentSchema.safeParse({ ...ok, photos: ['/uploads/a.jpg'] }).success, true);
 });
+
+test('equipmentSchema: виды работ и характеристики необязательны, мусор отсекается', async () => {
+  const { equipmentSchema } = await import('@/lib/validation');
+  const base = {
+    type: 'tractor', title: 'Трактор МТЗ-82', description: '', district: 'khujand',
+    price: '350', priceUnit: 'hectare', withOperator: true, photos: [],
+  };
+  const ok = equipmentSchema.parse({ ...base, works: ['plowing', 'hack'], workWidthM: '2,5', powerHp: '80', fuelLPerH: '', serviceRadiusKm: '30' });
+  assert.deepEqual(ok.works, ['plowing']);
+  assert.equal(ok.workWidthM, 2.5);
+  assert.equal(ok.fuelLPerH, null);
+  assert.equal(ok.powerHp, 80);
+  assert.equal(ok.serviceRadiusKm, 30);
+  const bad = equipmentSchema.safeParse({ ...base, powerHp: '80.5', serviceRadiusKm: '999' });
+  assert.equal(bad.success, false);
+});

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Sparkline } from '@/components/prices/Sparkline';
 import { productUnitKey } from '@/lib/equipment';
 import { formatAmount, formatDate } from '@/lib/format';
 import { localizedName, type Lang, type T } from '@/lib/i18n';
@@ -28,7 +29,15 @@ function Trend({ price, prev, t }: { price: number; prev: number | null; t: T })
   );
 }
 
-export function PriceTable({ board, lang, t }: { board: PriceBoard; lang: Lang; t: T }) {
+type Props = {
+  board: PriceBoard;
+  lang: Lang;
+  t: T;
+  /** Средние цены за 7 дней по продуктам — мини-график под названием (необязательно) */
+  trend?: Record<number, number[]>;
+};
+
+export function PriceTable({ board, lang, t, trend }: Props) {
   if (!board.date || board.rows.length === 0) {
     return <p className="rounded-xl border border-sand-200 bg-white p-5 text-center text-stone-600">{t('common.noData')}</p>;
   }
@@ -64,7 +73,14 @@ export function PriceTable({ board, lang, t }: { board: PriceBoard; lang: Lang; 
                   <Link href={`/prices/${row.product.id}`} className="text-lapis-900 underline-offset-2 hover:underline">
                     {localizedName(row.product, lang)}
                   </Link>
-                  <span className="block text-xs font-normal text-stone-500">1 {t(productUnitKey(row.product.unit))}</span>
+                  <span className="mt-0.5 flex items-center gap-1.5 text-xs font-normal whitespace-nowrap text-stone-500">
+                    1 {t(productUnitKey(row.product.unit))}
+                    {trend?.[row.product.id] && (
+                      <Link href={`/prices/${row.product.id}?days=7`} aria-label={`${t('prc.openChart')}: ${localizedName(row.product, lang)}`}>
+                        <Sparkline values={trend[row.product.id] ?? []} label={`${t('prc.week')}: ${localizedName(row.product, lang)}`} />
+                      </Link>
+                    )}
+                  </span>
                 </th>
                 {board.markets.map((m) => {
                   const cell = row.cells[m.id];

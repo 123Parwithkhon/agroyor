@@ -38,6 +38,11 @@ export default async function EditEquipmentPage({
             priceUnit: item.price_unit,
             withOperator: item.with_operator,
             photos: item.photos,
+            works: item.works,
+            workWidthM: item.work_width_m,
+            fuelLPerH: item.fuel_l_per_h,
+            powerHp: item.power_hp,
+            serviceRadiusKm: item.service_radius_km,
           }}
         />
       </div>

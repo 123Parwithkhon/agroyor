@@ -86,3 +86,24 @@ export const DEMO_BOOKINGS = [
 
 /** Базовые цены (сомони за единицу) и разница рынков: Хуҷанд дороже, Исфара дешевле. */
 export const MARKET_FACTORS = [1.06, 1.0, 0.96];
+
+/**
+ * Виды работ и характеристики демо-техники (ключ — key объявления).
+ * works не указан — берётся по виду техники; radius — радиус выезда, км (точка на карте).
+ */
+export const DEMO_SPECS = {
+  mtz82: { power: 80, width: 2.1, fuel: 9, radius: 25 },
+  kps4: { width: 4, radius: 20 },
+  neva: { power: 7, width: 0.9, fuel: 1.5, radius: 10 },
+  sz36: { width: 3.6, radius: 30 },
+  op2000: { width: 18, radius: 30 },
+  pts4: { radius: 40 },
+  niva: { power: 150, width: 5, fuel: 18, radius: 50 },
+  mtz1221: { power: 130, width: 3.5, fuel: 16, radius: 40 },
+  t40: { width: 11, radius: 30 },
+  zubr: { power: 9, width: 1, fuel: 1.8, radius: 10 },
+  umz6: { power: 60, width: 2, fuel: 8, radius: 25 },
+  pump: { works: ['irrigation'], power: 15, fuel: 3, radius: 15 },
+  pts2: { radius: 30 },
+  backpack: { works: ['spraying'], radius: 5 },
+};

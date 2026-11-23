@@ -34,3 +34,21 @@ test('monthGrid: ноябрь 2026 начинается с воскресень�
   assert.equal(g[0]?.[6], '2026-11-01');
   assert.equal(g.flat().filter(Boolean).length, 30);
 });
+
+test('pickDate, rangeOverlaps, parseQty, rentalCost', async () => {
+  const { pickDate, rangeOverlaps, parseQty, rentalCost } = await import('@/lib/booking-rules');
+  assert.deepEqual(pickDate({ start: '', end: '' }, '2026-12-03'), { start: '2026-12-03', end: '' });
+  assert.deepEqual(pickDate({ start: '2026-12-03', end: '' }, '2026-12-05'), { start: '2026-12-03', end: '2026-12-05' });
+  assert.deepEqual(pickDate({ start: '2026-12-03', end: '' }, '2026-12-03'), { start: '2026-12-03', end: '2026-12-03' });
+  assert.deepEqual(pickDate({ start: '2026-12-03', end: '' }, '2026-12-01'), { start: '2026-12-01', end: '' });
+  assert.deepEqual(pickDate({ start: '2026-12-03', end: '2026-12-05' }, '2026-12-10'), { start: '2026-12-10', end: '' });
+  const busy = [{ start_date: '2026-12-04', end_date: '2026-12-04' }];
+  assert.equal(rangeOverlaps('2026-12-03', '2026-12-05', busy), true);
+  assert.equal(rangeOverlaps('2026-12-05', '2026-12-06', busy), false);
+  assert.equal(parseQty('3'), 3);
+  assert.equal(parseQty('2,5'), 2.5);
+  assert.equal(parseQty('0'), null);
+  assert.equal(parseQty('abc'), null);
+  assert.equal(rentalCost(3, 300), 900);
+  assert.equal(rentalCost(2.5, 33.33), 83.33);
+});

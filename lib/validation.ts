@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { normalizePhone } from '@/lib/phone';
 import { DISTRICTS } from '@/lib/districts';
 import { EQUIPMENT_TYPES, PRICE_UNITS, PRODUCT_UNITS } from '@/lib/equipment';
+import { isWork, WORKS } from '@/lib/works';
 
 // Сообщения — ключи словаря i18n, а не готовый текст
 const phone = z
@@ -54,6 +55,28 @@ function isPhotoUrl(v: string): boolean {
   }
 }
 
+/**
+ * Необязательное число из формы: пустая строка → null; запятая как десятичный разделитель.
+ * Границы как в CHECK миграции 008: строго больше min, не больше max (целое — если integer).
+ */
+function optionalNumber(min: number, max: number, integer = false) {
+  const pattern = integer ? /^\d+$/ : /^\d+(\.\d{1,2})?$/;
+  return z
+    .string()
+    .optional()
+    .transform((value, ctx): number | null => {
+      const raw = (value ?? '').trim();
+      if (raw === '') return null;
+      const s = raw.replace(',', '.');
+      const n = Number(s);
+      if (!pattern.test(s) || !(n > min && n <= max)) {
+        ctx.addIssue({ code: 'custom', message: 'err.specInvalid' });
+        return z.NEVER;
+      }
+      return n;
+    });
+}
+
 export const equipmentSchema = z.object({
   type: z.enum(EQUIPMENT_TYPES, 'err.kindInvalid'),
   title: z.string().trim().min(3, 'err.titleShort').max(100, 'err.titleShort'),
@@ -73,6 +96,12 @@ export const equipmentSchema = z.object({
     .array(z.string())
     .max(5, 'err.photoInvalid')
     .refine((a) => a.every(isPhotoUrl), 'err.photoInvalid'),
+  // Неизвестные коды работ отбрасываются; пустой список дополняется по виду техники (resolveWorks)
+  works: z.array(z.string()).max(WORKS.length).default([]).transform((a) => a.filter(isWork)),
+  workWidthM: optionalNumber(0, 100),
+  fuelLPerH: optionalNumber(0, 500),
+  powerHp: optionalNumber(0, 2000, true),
+  serviceRadiusKm: optionalNumber(0, 300, true),
 });
 
 export type EquipmentInput = z.infer<typeof equipmentSchema>;

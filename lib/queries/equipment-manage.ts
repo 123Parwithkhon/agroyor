@@ -14,10 +14,16 @@ export type MyEquipment = {
   photos: string[];
   active: boolean;
   hidden_by_admin: boolean;
+  works: string[];
+  work_width_m: number | null;
+  fuel_l_per_h: number | null;
+  power_hp: number | null;
+  service_radius_km: number | null;
 };
 
 const COLS = `id::text AS id, type, title, description, district, price, price_unit,
-  with_operator, photos, active, hidden_by_admin`;
+  with_operator, photos, active, hidden_by_admin, works, work_width_m, fuel_l_per_h, power_hp,
+  service_radius_km`;
 
 export async function getMyEquipment(userId: string): Promise<MyEquipment[]> {
   const sql = db();

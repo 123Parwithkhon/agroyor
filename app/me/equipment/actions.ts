@@ -7,27 +7,38 @@ import { requireUser } from '@/lib/auth-guards';
 import { formValues } from '@/lib/form-values';
 import { equipmentSchema, fieldErrors, type EquipmentInput } from '@/lib/validation';
 import type { FormState } from '@/lib/form-state';
+import { resolveWorks } from '@/lib/works';
 
-const FIELDS = ['type', 'title', 'description', 'district', 'price', 'priceUnit'] as const;
+const FIELDS = [
+  'type', 'title', 'description', 'district', 'price', 'priceUnit',
+  'workWidthM', 'fuelLPerH', 'powerHp', 'serviceRadiusKm',
+] as const;
 
 // Значения формы, чтобы вернуть их при ошибке (поля не очищаются)
 function values(fd: FormData): Record<string, string> {
   return {
     ...formValues(fd, FIELDS),
     withOperator: fd.get('withOperator') === 'on' ? 'on' : '',
+    works: fd.getAll('works').map(String).join(','),
   };
 }
 
 function parse(fd: FormData) {
+  const s = (k: string) => String(fd.get(k) ?? '');
   return equipmentSchema.safeParse({
-    type: String(fd.get('type') ?? ''),
-    title: String(fd.get('title') ?? ''),
-    description: String(fd.get('description') ?? ''),
-    district: String(fd.get('district') ?? ''),
-    price: String(fd.get('price') ?? ''),
-    priceUnit: String(fd.get('priceUnit') ?? ''),
+    type: s('type'),
+    title: s('title'),
+    description: s('description'),
+    district: s('district'),
+    price: s('price'),
+    priceUnit: s('priceUnit'),
     withOperator: fd.get('withOperator') === 'on',
     photos: fd.getAll('photos').map(String).filter(Boolean),
+    works: fd.getAll('works').map(String),
+    workWidthM: s('workWidthM'),
+    fuelLPerH: s('fuelLPerH'),
+    powerHp: s('powerHp'),
+    serviceRadiusKm: s('serviceRadiusKm'),
   });
 }
 
@@ -45,10 +56,13 @@ export async function createEquipmentAction(_prev: FormState, formData: FormData
   if (!parsed.success) return { fields: fieldErrors(parsed.error), values: values(formData) };
   const d: EquipmentInput = parsed.data;
 
+  const works = resolveWorks(d.works, d.type);
   const [row] = await db()<{ id: string }[]>`
-    INSERT INTO equipment (owner_id, type, title, description, district, price, price_unit, with_operator, photos)
+    INSERT INTO equipment (owner_id, type, title, description, district, price, price_unit, with_operator, photos,
+                           works, work_width_m, fuel_l_per_h, power_hp, service_radius_km)
     VALUES (${user.id}, ${d.type}, ${d.title}, ${d.description}, ${d.district}, ${d.price}, ${d.priceUnit},
-            ${d.withOperator}, ${d.photos})
+            ${d.withOperator}, ${d.photos}, ${works}, ${d.workWidthM}, ${d.fuelLPerH}, ${d.powerHp},
+            ${d.serviceRadiusKm})
     RETURNING id::text AS id
   `;
   revalidateCatalog(row?.id);
@@ -69,7 +83,9 @@ export async function updateEquipmentAction(
   const rows = await db()`
     UPDATE equipment SET type = ${d.type}, title = ${d.title}, description = ${d.description},
       district = ${d.district}, price = ${d.price}, price_unit = ${d.priceUnit},
-      with_operator = ${d.withOperator}, photos = ${d.photos}
+      with_operator = ${d.withOperator}, photos = ${d.photos}, works = ${resolveWorks(d.works, d.type)},
+      work_width_m = ${d.workWidthM}, fuel_l_per_h = ${d.fuelLPerH}, power_hp = ${d.powerHp},
+      service_radius_km = ${d.serviceRadiusKm}
     WHERE id = ${id} AND owner_id = ${user.id}
     RETURNING id
   `;

@@ -12,6 +12,7 @@ type Props = {
   types: Option[];
   units: Option[];
   districts: Option[];
+  works: Option[];
   initial?: {
     type: string;
     title: string;
@@ -21,8 +22,21 @@ type Props = {
     priceUnit: string;
     withOperator: boolean;
     photos: string[];
+    works: string[];
+    workWidthM: number | null;
+    fuelLPerH: number | null;
+    powerHp: number | null;
+    serviceRadiusKm: number | null;
   };
   labels: {
+    works: string;
+    worksHint: string;
+    specs: string;
+    specsHint: string;
+    workWidthM: string;
+    fuelLPerH: string;
+    powerHp: string;
+    serviceRadiusKm: string;
     type: string;
     title: string;
     description: string;
@@ -57,12 +71,29 @@ function Select({
   );
 }
 
-export default function EquipmentForm({ action, msgs, types, units, districts, initial, labels }: Props) {
+export default function EquipmentForm({ action, msgs, types, units, districts, works, initial, labels }: Props) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, null);
   const m = (key?: string) => (key ? (msgs[key] ?? msgs['err.generic']) : undefined);
   const f = state?.fields;
-  const v = (key: string, fallback?: string | number) =>
-    state?.values?.[key] ?? (fallback === undefined ? '' : String(fallback));
+  const v = (key: string, fallback?: string | number | null) =>
+    state?.values?.[key] ?? (fallback === undefined || fallback === null ? '' : String(fallback));
+  // После ошибки — отмеченные пользователем работы, иначе сохранённые
+  const checkedWorks = state?.values ? (state.values.works ?? '').split(',') : (initial?.works ?? []);
+
+  const spec = (id: 'workWidthM' | 'fuelLPerH' | 'powerHp' | 'serviceRadiusKm', integer: boolean) => (
+    <div className="space-y-1">
+      <label htmlFor={`f-${id}`} className="block text-sm font-medium">{labels[id]}</label>
+      <input
+        id={`f-${id}`}
+        name={id}
+        type="text"
+        inputMode={integer ? 'numeric' : 'decimal'}
+        defaultValue={v(id, initial?.[id])}
+        className={control}
+      />
+      {f?.[id] && <p role="alert" className="text-sm text-anor-700">{m(f[id])}</p>}
+    </div>
+  );
 
   return (
     <form action={formAction} className="space-y-4">
@@ -107,6 +138,28 @@ export default function EquipmentForm({ action, msgs, types, units, districts, i
         <input type="checkbox" name="withOperator" defaultChecked={state?.values ? state.values.withOperator === 'on' : initial?.withOperator} className="size-5" />
         <span className="text-base">{labels.withOperator}</span>
       </label>
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium">{labels.works}</legend>
+        <div className="grid grid-cols-2 gap-x-3">
+          {works.map((w) => (
+            <label key={w.value} className="flex min-h-11 items-center gap-3">
+              <input type="checkbox" name="works" value={w.value} defaultChecked={checkedWorks.includes(w.value)} className="size-5" />
+              <span>{w.label}</span>
+            </label>
+          ))}
+        </div>
+        <p className="text-xs text-stone-600">{labels.worksHint}</p>
+      </fieldset>
+      <fieldset className="space-y-3 rounded-lg border border-sand-200 p-3">
+        <legend className="px-1 text-sm font-medium">{labels.specs}</legend>
+        <p className="text-xs text-stone-600">{labels.specsHint}</p>
+        <div className="grid grid-cols-2 gap-3">
+          {spec('workWidthM', false)}
+          {spec('fuelLPerH', false)}
+          {spec('powerHp', true)}
+          {spec('serviceRadiusKm', true)}
+        </div>
+      </fieldset>
       <div className="space-y-2">
         <p className="text-sm font-medium">{labels.photos}</p>
         <PhotoUploader

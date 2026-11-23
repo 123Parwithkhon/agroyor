@@ -3,6 +3,7 @@ import { getT } from '@/lib/i18n-server';
 import { authMessages } from '@/lib/auth-messages';
 import { DISTRICTS } from '@/lib/districts';
 import { EQUIPMENT_TYPES, PRICE_UNITS, priceUnitKey, typeKey } from '@/lib/equipment';
+import { WORKS, workKey } from '@/lib/works';
 
 // Подписи и списки для формы объявления на языке пользователя
 export async function equipmentFormProps() {
@@ -12,7 +13,16 @@ export async function equipmentFormProps() {
     types: EQUIPMENT_TYPES.map((k) => ({ value: k, label: t(typeKey(k)) })),
     units: PRICE_UNITS.map((u) => ({ value: u, label: t(priceUnitKey(u)) })),
     districts: DISTRICTS.map((d) => ({ value: d.code, label: d[lang] })),
+    works: WORKS.map((w) => ({ value: w, label: t(workKey(w)) })),
     labels: {
+      works: t('eq.works'),
+      worksHint: t('eq.worksHint'),
+      specs: t('eq.specs'),
+      specsHint: t('eq.specsHint'),
+      workWidthM: t('eq.width'),
+      fuelLPerH: t('eq.fuel'),
+      powerHp: t('eq.power'),
+      serviceRadiusKm: t('eq.radius'),
       type: t('eq.kind'),
       title: t('eq.title'),
       description: t('eq.description'),

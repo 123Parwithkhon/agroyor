@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { SuzaniMedallion } from '@/components/ornaments';
 import { getT } from '@/lib/i18n-server';
+import { STATIC_DEMO } from '@/lib/static-demo';
 
 export default async function NotFound() {
   const { t } = await getT();
@@ -8,6 +9,7 @@ export default async function NotFound() {
     <section className="flex flex-col items-center py-10 text-center">
       <SuzaniMedallion className="size-28 text-lapis-700 opacity-80" />
       <h1 className="mt-4 text-2xl font-bold text-lapis-900">{t('notFound.title')}</h1>
+      {STATIC_DEMO && <p className="mt-3 max-w-md text-stone-600">{t('demo.missing')}</p>}
       <Link
         href="/"
         className="mt-6 inline-flex min-h-11 items-center rounded-xl bg-firuza-700 px-5 font-semibold text-white hover:bg-firuza-800"

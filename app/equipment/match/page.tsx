@@ -29,6 +29,7 @@ import { durationText, num } from '@/lib/duration';
 import { listForMatching } from '@/lib/queries/equipment-search';
 import { getUserDistrict } from '@/lib/queries/user';
 import { workKey } from '@/lib/works';
+import { STATIC_AREAS, STATIC_DEMO } from '@/lib/static-demo';
 import Icon, { type IconName } from '@/components/landing/Icon';
 
 export const generateMetadata = () => pageMetadata('match.title');
@@ -111,14 +112,23 @@ export default async function MatchPage({ searchParams }: { searchParams: Promis
           <legend className={`${legend} sm:col-span-2`}><span className={step}>3</span>{t('match.field')}</legend>
           <label className="grid gap-1 text-sm font-medium">
             {t('match.area')}
-            <input
-              name="area"
-              inputMode="decimal"
-              required
-              defaultValue={sp.area ?? '2'}
-              className="min-h-12 rounded-xl border border-stone-300 bg-white px-3 text-lg font-semibold"
-              aria-invalid={submitted && area === null ? true : undefined}
-            />
+            {STATIC_DEMO ? (
+              // Демо-версия: все ответы сохранены заранее, поэтому площадь — из готового списка
+              <select name="area" defaultValue={sp.area ?? '2'} className="min-h-12 rounded-xl border border-stone-300 bg-white px-3 text-lg font-semibold">
+                {STATIC_AREAS.map((a) => (
+                  <option key={a} value={a}>{a}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                name="area"
+                inputMode="decimal"
+                required
+                defaultValue={sp.area ?? '2'}
+                className="min-h-12 rounded-xl border border-stone-300 bg-white px-3 text-lg font-semibold"
+                aria-invalid={submitted && area === null ? true : undefined}
+              />
+            )}
           </label>
           <label className="grid gap-1 text-sm font-medium">
             {t('auth.district')}

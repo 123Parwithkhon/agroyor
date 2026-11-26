@@ -1,0 +1,92 @@
+# Демо-версия AgroYor на GitHub Pages: https://123parwithkhon.github.io/agroyor/
+#
+# GitHub Pages умеет только отдавать файлы, а AgroYor — серверное приложение (база, вход, брони).
+# Поэтому здесь сайт запускается целиком прямо в GitHub Actions (локальная база PGlite + демо-данные),
+# scripts/export-static.mjs обходит все страницы на трёх языках и сохраняет их в out/,
+# и out/ публикуется на Pages. В демо-версии — просмотр; вход, бронь и ввод цен — в полной версии.
+#
+# Пересборка: при каждом push в main, вручную (Actions → Run workflow) и каждый день,
+# чтобы «цены на сегодня» были на текущую дату.
+name: Deploy demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 1 * * *' # 06:00 по Душанбе
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: pglite://.data/pglite
+      PGLITE_PORT: '5433'
+      ADMIN_PHONE: '+992900000000'
+      AUTH_TRUST_HOST: 'true'
+      NEXT_PUBLIC_STATIC_DEMO: '1'
+      NEXT_PUBLIC_BASE_PATH: /agroyor
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Секреты нужны только серверу внутри этой сборки — каждый раз новые, нигде не сохраняются
+      - name: Generate one-time secrets
+        run: |
+          echo "AUTH_SECRET=$(openssl rand -base64 32)" >> "$GITHUB_ENV"
+          echo "ADMIN_PASSWORD=$(openssl rand -base64 18)" >> "$GITHUB_ENV"
+
+      - name: Database with demo data
+        run: |
+          npm run db:migrate
+          npm run db:seed -- --demo
+
+      - name: Build
+        run: npm run build
+
+      - name: Start site and export static pages
+        run: |
+          npm run start:local > server.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:3000/agroyor/api/health && break
+            sleep 2
+          done
+          npm run export:static
+
+      - name: Server log (on failure)
+        if: failure()
+        run: cat server.log || true
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

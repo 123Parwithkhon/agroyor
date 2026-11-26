@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
   // postgres.js не бандлим — подключается как обычный node-модуль
   serverExternalPackages: ['postgres'],
   poweredByHeader: false,
+  // Демо-версия на GitHub Pages живёт в подпапке /agroyor (см. .github/workflows/deploy.yml)
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || undefined,
   experimental: {
     // Кэш Turbopack в .next/ без чистки разрастался до сотен МБ.
     // Сборщик мусора удаляет то, что не использовалось больше суток.

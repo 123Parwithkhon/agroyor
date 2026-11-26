@@ -1,10 +1,12 @@
 import 'server-only';
+import { STATIC_DEMO } from '@/lib/static-demo';
 import { db } from '@/lib/db';
 import type { EquipmentType } from '@/lib/equipment';
 import type { EquipmentListItem } from '@/lib/queries/equipment';
 import type { Work } from '@/lib/works';
 
-export const PAGE_SIZE = 12;
+// В демо-версии (GitHub Pages) нет ?page=2 — показываем всё одной страницей
+export const PAGE_SIZE = STATIC_DEMO ? 200 : 12;
 
 export type CatalogFilters = {
   type?: EquipmentType;

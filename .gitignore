@@ -8,3 +8,5 @@ next-env.d.ts
 .vercel
 # Фото, загруженные локально без токена Vercel Blob
 public/uploads/
+# Статическая демо-копия для GitHub Pages (scripts/export-static.mjs)
+out/

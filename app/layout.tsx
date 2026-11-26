@@ -8,6 +8,7 @@ import { getCurrentUser } from '@/lib/auth-guards';
 import { htmlLang } from '@/lib/i18n';
 import { getT } from '@/lib/i18n-server';
 import { getBadgeCount } from '@/lib/queries/bookings';
+import { STATIC_DEMO, staticDemoScript } from '@/lib/static-demo';
 import { getDemandBadge } from '@/lib/queries/demand';
 import './globals.css';
 
@@ -54,6 +55,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           {t('common.skipToContent')}
         </a>
+        {STATIC_DEMO && (
+          <>
+            {/* Скрипт целиком наш (lib/static-demo.ts), пользовательского ввода в нём нет */}
+            {/* eslint-disable-next-line react/no-danger */}
+            <script dangerouslySetInnerHTML={{ __html: staticDemoScript(t('demo.blocked')) }} />
+            <p role="note" className="bg-zar-400 px-4 py-2 text-center text-sm font-semibold text-lapis-900">
+              {t('demo.banner')}
+            </p>
+          </>
+        )}
         <OfflineSupport text={t('pwa.offline')} />
         <Header lang={lang} t={t} userName={user?.name ?? null} badge={badge} />
         <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">

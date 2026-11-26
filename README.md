@@ -27,6 +27,19 @@ npm run dev                   # http://localhost:3000
 (`+992900000003` — репортёр цен). Повторный запуск ничего не дублирует и обновляет цены до сегодняшнего дня.
 Сами данные лежат в `scripts/lib/demo-data.mjs`.
 
+## Демо-версия на GitHub Pages
+
+https://123parwithkhon.github.io/agroyor/ (русский — `/agroyor/ru/`, английский — `/agroyor/en/`)
+
+GitHub Pages отдаёт только файлы, а AgroYor — серверное приложение. Поэтому `.github/workflows/deploy.yml`
+запускает сайт целиком внутри GitHub Actions (PGlite + демо-данные, сборка с `NEXT_PUBLIC_STATIC_DEMO=1`
+и `NEXT_PUBLIC_BASE_PATH=/agroyor`), `npm run export:static` обходит все страницы на трёх языках и сохраняет их в `out/`,
+а `out/` публикуется на Pages. Пересборка — при push в `main`, вручную и каждый день (цены на текущую дату).
+
+В демо-версии: каталог, фото, цены и графики, карта, аналитика, подбор комплекса (площадь 1, 2 или 5 га),
+поиск по виду техники и району. Вход, бронирование, ввод цен и кличи показывают «доступно в полной версии».
+Логика демо-режима — `lib/static-demo.ts`.
+
 ## Как устроена база
 
 - `DATABASE_URL=pglite://.data/pglite`: локальный PGlite (Postgres в WebAssembly, файлы в `.data/`).

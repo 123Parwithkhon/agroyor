@@ -1,5 +1,6 @@
 'use client';
 
+import { STATIC_DEMO } from '@/lib/static-demo';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
 function subscribe(onChange: () => void): () => void {
@@ -37,7 +38,8 @@ export function OfflineSupport({ text }: { text: string }) {
   const [fromCache, setFromCache] = useState(false);
 
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'production' || !('serviceWorker' in navigator)) return;
+    // В демо-версии на GitHub Pages service worker не нужен: страницы и так статические
+    if (process.env.NODE_ENV !== 'production' || STATIC_DEMO || !('serviceWorker' in navigator)) return;
     navigator.serviceWorker.register('/sw.js').catch(() => {
       // Без service worker сайт работает как обычно — ошибку не показываем
     });

@@ -1,6 +1,8 @@
 // Начальные данные: рынки, продукты, админ из ADMIN_PHONE/ADMIN_PASSWORD.
 // Флаг --demo (только для локальной PGlite) добавляет демо-пользователей, технику и цены за 30 дней.
-import { DEMO_BOOKINGS, DEMO_EQUIPMENT, DEMO_GROUPS, DEMO_PHOTOS, DEMO_SPECS, DEMO_USERS, MARKET_FACTORS } from './lib/demo-data.mjs';
+import {
+  DEMO_BOOKINGS, DEMO_EQUIPMENT, DEMO_GROUPS, DEMO_PHOTOS, DEMO_REQUESTS, DEMO_SPECS, DEMO_TRIPS, DEMO_USERS, MARKET_FACTORS,
+} from './lib/demo-data.mjs';
 import { connectForScript } from './lib/local-db.mjs';
 import { todayInDushanbe } from '../lib/format.ts';
 import { hashPassword } from '../lib/password.ts';
@@ -206,6 +208,37 @@ async function seedDemoPrices(reporterId) {
   console.log(`✔ Демо-цены: ${result.count} записей за 30 дней`);
 }
 
+async function seedDemoRequests(userIds, equipmentIds) {
+  const [{ count }] = await sql`SELECT count(*)::int AS count FROM demand_requests`;
+  if (count > 0) return console.log('Демо-кличи уже есть — пропускаю');
+  for (const r of DEMO_REQUESTS) {
+    const [row] = await sql`
+      INSERT INTO demand_requests (user_id, type, district, need_date, area_ha, budget_per_ha, note, created_at, author_seen_at)
+      VALUES (${userIds.get(r.user)}, ${r.type}, ${r.district}, ${dayOffset(r.from)}, ${r.area}, ${r.budget}, ${r.note},
+              now() - interval '1 day', now() - interval '1 day')
+      RETURNING id`;
+    for (const key of r.respond ?? []) {
+      const equipmentId = equipmentIds.get(key);
+      const [{ owner_id: ownerId }] = await sql`SELECT owner_id FROM equipment WHERE id = ${equipmentId}`;
+      await sql`INSERT INTO demand_responses (request_id, owner_id, equipment_id) VALUES (${row.id}, ${ownerId}, ${equipmentId})`;
+    }
+  }
+  console.log(`✔ Демо-кличи: ${DEMO_REQUESTS.length}`);
+}
+
+async function seedDemoTrips(userIds) {
+  const [{ count }] = await sql`SELECT count(*)::int AS count FROM trips`;
+  if (count > 0) return console.log('Демо-рейсы уже есть — пропускаю');
+  for (const tr of DEMO_TRIPS) {
+    await sql`
+      INSERT INTO trips (user_id, product_id, tons, from_district, market_id, trip_date)
+      SELECT ${userIds.get(tr.user)}, p.id, ${tr.tons}, ${tr.from}, m.id, ${dayOffset(tr.day)}
+      FROM products p, markets m WHERE p.name_en = ${tr.product} AND m.name_en = ${tr.market}
+      ON CONFLICT DO NOTHING`;
+  }
+  console.log(`✔ Демо-рейсы: ${DEMO_TRIPS.length}`);
+}
+
 async function seedDemo() {
   const hash = await hashPassword('demo1234');
   const userIds = await seedDemoUsers(hash);
@@ -213,6 +246,8 @@ async function seedDemo() {
   await seedDemoBookings(userIds, equipmentIds);
   await seedDemoGroups(userIds, equipmentIds);
   await seedDemoPrices(userIds.get(3));
+  await seedDemoRequests(userIds, equipmentIds);
+  await seedDemoTrips(userIds);
 }
 
 try {

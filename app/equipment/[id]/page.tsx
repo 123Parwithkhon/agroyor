@@ -22,6 +22,7 @@ import { getBookedRanges, getOpenGroups } from '@/lib/queries/bookings';
 import { GroupOrders } from '@/components/booking/GroupOrders';
 import { getEquipment, getUserReviews } from '@/lib/queries/equipment';
 import { createBookingAction } from './actions';
+import Icon from '@/components/landing/Icon';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -175,6 +176,22 @@ export default async function EquipmentItemPage({ params }: Props) {
 
         </div>
       </div>
+
+      {/* «Цифровой маршрут урожая»: прицеп/грузовой транспорт — рейс поле → рынок с ценами и попутчиками */}
+      {works.includes('transport') && (
+        <Link
+          href={`/trips?eq=${item.id}&from=${item.district}`}
+          className="group flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-firuza-50 p-4 ring-1 ring-firuza-100 sm:p-5"
+        >
+          <span>
+            <span className="block text-lg font-bold text-lapis-900"><Icon name="truck" className="inline-block size-[1.1em] shrink-0 align-[-0.15em] me-1.5" />{t('trips.cardTitle')}</span>
+            <span className="block text-sm text-stone-700">{t('trips.cardText')}</span>
+          </span>
+          <span className="inline-flex min-h-11 items-center rounded-xl bg-firuza-700 px-4 font-semibold text-white group-hover:bg-firuza-800">
+            {t('trips.cardBtn')} →
+          </span>
+        </Link>
+      )}
 
       {item.price_unit === 'hectare' && (
         <GroupOrders

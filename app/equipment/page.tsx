@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { EquipmentCard } from '@/components/EquipmentCard';
 import EquipmentMap, { type MapMarket, type MapPoint } from '@/components/map/EquipmentMap';
 import { OrnateHeading } from '@/components/ornaments';
+import { SeasonStrip } from '@/components/season/SeasonStrip';
+import { seasonOf } from '@/lib/season';
 import { DISTRICTS, type DistrictCode } from '@/lib/districts';
 import { EQUIPMENT_TYPES, priceUnitKey, typeKey, type EquipmentType } from '@/lib/equipment';
 import { formatMoney, todayInDushanbe } from '@/lib/format';
@@ -11,6 +13,7 @@ import { getT, pageMetadata } from '@/lib/i18n-server';
 import { PAGE_SIZE, searchEquipment, searchEquipmentForMap } from '@/lib/queries/equipment-search';
 import { getPriceBoard } from '@/lib/queries/prices';
 import { isWork, WORKS, workKey } from '@/lib/works';
+import Icon from '@/components/landing/Icon';
 
 export const generateMetadata = () => pageMetadata('page.equipment');
 
@@ -56,6 +59,20 @@ export default async function EquipmentPage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="flex flex-col gap-6">
+      {/* «Вау»-кнопка: мастер подбора комплекса под культуру, этап и площадь */}
+      <Link
+        href="/equipment/match"
+        className="group flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-lapis-900 p-4 text-white shadow-lg on-dark sm:p-5"
+      >
+        <span>
+          <span className="block text-lg font-extrabold sm:text-xl"><Icon name="sparkles" className="inline-block size-[1.1em] shrink-0 align-[-0.15em] me-1.5" />{t('match.cta')}</span>
+          <span className="block text-sm text-lapis-100/90">{t('match.ctaText')}</span>
+        </span>
+        <span className="inline-flex min-h-11 items-center rounded-xl bg-zar-400 px-4 font-bold text-lapis-900 transition group-hover:bg-zar-300">
+          {t('match.ctaBtn')} →
+        </span>
+      </Link>
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <OrnateHeading as="h1">{t('page.equipment')}</OrnateHeading>
         <nav className="flex w-full gap-2 sm:w-auto" aria-label={t('map.view')}>
@@ -105,6 +122,8 @@ export default async function EquipmentPage({ searchParams }: { searchParams: Pr
         </button>
       </form>
 
+      <SeasonStrip season={seasonOf(todayInDushanbe())} t={t} activeType={type} />
+
       {mapView ? (
         <MapSection type={type} work={work} district={district} operator={operator} />
       ) : (
@@ -122,7 +141,17 @@ export default async function EquipmentPage({ searchParams }: { searchParams: Pr
     return (
       <>
         {items.length === 0 ? (
-          <p className="rounded-xl border border-sand-200 bg-white p-5 text-center text-stone-600">{t('eq.noResults')}</p>
+          // «Сигнал дефицита»: вместо «ничего не найдено» — клич владельцам техники в районе
+          <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-anor-600/40 bg-white p-6 text-center">
+            <p className="text-lg font-bold text-lapis-900">{t('eq.noResults')}</p>
+            <p className="max-w-lg text-stone-700">{t('demand.emptyCatalog')}</p>
+            <Link
+              href={`/requests/new?${new URLSearchParams({ ...(p.type ? { type: p.type } : {}), ...(p.district ? { district: p.district } : {}) })}`}
+              className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-anor-600 px-5 text-lg font-bold text-white hover:bg-anor-700"
+            >
+              <Icon name="megaphone" className="inline-block size-[1.1em] shrink-0 align-[-0.15em] me-1.5" />{t('demand.ctaLong')}
+            </Link>
+          </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((it) => (

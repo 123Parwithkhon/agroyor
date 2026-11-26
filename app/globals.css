@@ -141,6 +141,30 @@
     linear-gradient(180deg, #0d1a40 0%, #152657 55%, #23408e 100%);
 }
 
+/* Затемнение над пейзажем героя: слева под текстом и у верхнего края */
+.hero-scrim {
+  background:
+    linear-gradient(90deg, rgb(13 26 64 / 0.78) 0%, rgb(13 26 64 / 0.45) 45%, transparent 75%),
+    linear-gradient(180deg, rgb(13 26 64 / 0.55) 0%, transparent 35%);
+}
+@media (max-width: 1023px) {
+  .hero-scrim {
+    background: linear-gradient(180deg, rgb(13 26 64 / 0.7) 0%, rgb(13 26 64 / 0.5) 55%, transparent 85%);
+  }
+}
+
+/* Мерцание редких звёзд в небе героя */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-twinkle {
+    animation: hero-twinkle 3.5s ease-in-out infinite;
+  }
+}
+@keyframes hero-twinkle {
+  50% {
+    opacity: 0.15;
+  }
+}
+
 /* Золотой градиент в акцентной строке заголовка */
 .text-gold {
   background: linear-gradient(90deg, var(--color-zar-300), var(--color-zar-400) 60%, #f6dc9f);
@@ -239,4 +263,13 @@ video {
 }
 @media (prefers-reduced-motion: reduce) {
   .ay-market-dot::after { animation: none; }
+}
+/* Тепловая карта аналитики: число машин в районе — белая цифра в центре круга */
+.ay-heat-label {
+  transform: translate(-50%, -50%);
+  min-width: 22px;
+  text-align: center;
+  color: #fff;
+  font: 800 13px/22px 'Noto Sans', sans-serif;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.6);
 }

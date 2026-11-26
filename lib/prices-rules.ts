@@ -28,15 +28,3 @@ export function isIsoDate(s: string | null | undefined): s is string {
 export function shiftDate(iso: string, days: number): string {
   return new Date(Date.parse(`${iso}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10);
 }
-
-// Ячейка CSV: кавычки и защита от формул в Excel
-export function csvCell(v: string | number): string {
-  let s = String(v);
-  if (typeof v === 'string' && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
-  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
-
-// UTF-8 с BOM, чтобы Excel правильно показал кириллицу
-export function buildCsv(header: string[], rows: (string | number)[][]): string {
-  return '\uFEFF' + [header, ...rows].map((r) => r.map(csvCell).join(',')).join('\r\n') + '\r\n';
-}

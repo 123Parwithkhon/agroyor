@@ -9,12 +9,13 @@ import { todayInDushanbe } from '@/lib/format';
 import { localizedName } from '@/lib/i18n';
 import { getT, pageMetadata } from '@/lib/i18n-server';
 import { isIsoDate } from '@/lib/prices-rules';
+import { isSeason, isSeasonalProduct, seasonOf, seasonTitleKey, SEASONS } from '@/lib/season';
 import { getCheapestTransportPerDay, getPriceBoard, getWeekTrend } from '@/lib/queries/prices';
 import { getUserDistrict } from '@/lib/queries/user';
 
 export const generateMetadata = () => pageMetadata('prc.pageTitle');
 
-type Props = { searchParams: Promise<{ date?: string }> };
+type Props = { searchParams: Promise<{ date?: string; season?: string }> };
 
 // Цены рынков на выбранную дату: таблица с мини-графиками за неделю, умная подсказка,
 // калькулятор «где выгоднее продать». Выбор даты — обычная GET-форма (работает без JS).
@@ -28,6 +29,9 @@ export default async function PricesPage({ searchParams }: Props) {
   const board = await getPriceBoard(date);
   const trend = board.date ? await getWeekTrend(board.date) : {};
   const rent = (await getCheapestTransportPerDay()) ?? 150;
+  // Агро-календарь: сезонные продукты (текущего периода или выбранного на главной) подсвечены
+  const season = isSeason(sp.season) ? sp.season : seasonOf(today);
+  const seasonal = new Set(board.rows.filter((r) => isSeasonalProduct(season, r.product.name_en)).map((r) => r.product.id));
   const user = await getCurrentUser();
   const district = user ? await getUserDistrict(user.id) : null;
 
@@ -43,11 +47,11 @@ export default async function PricesPage({ searchParams }: Props) {
         <OrnateHeading as="h1">{t('prc.pageTitle')}</OrnateHeading>
         <div className="flex flex-wrap gap-2">
           <a
-            href={`/api/prices.csv?from=${board.date ?? date}&to=${board.date ?? date}`}
+            href={`/api/prices.xlsx?from=${board.date ?? date}&to=${board.date ?? date}`}
             className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-stone-300 bg-white px-3 font-medium text-firuza-800"
           >
             <DownloadIcon className="size-5" />
-            {t('prc.csv')}
+            {t('prc.xlsx')}
           </a>
           {user?.roles.includes('reporter') && (
             <Link href="/reporter" className="inline-flex min-h-11 items-center rounded-lg bg-firuza-700 px-3 font-semibold text-white">
@@ -78,7 +82,21 @@ export default async function PricesPage({ searchParams }: Props) {
         <p className="text-sm text-stone-600">{t('prc.noData')}</p>
       )}
       <div>
-        <PriceTable board={board} lang={lang} t={t} trend={trend} />
+        {seasonal.size > 0 && (
+          <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
+            <span className="rounded-full bg-zar-300 px-2 py-0.5 text-xs font-bold text-lapis-900">{t('season.badge')}</span>
+            <span className="text-stone-700">{t('season.pricesHint')}: <b>{t(seasonTitleKey(season))}</b></span>
+            <span className="flex flex-wrap gap-1">
+              {SEASONS.filter((s) => s !== season).map((s) => (
+                <Link key={s} href={`/prices?season=${s}${sp.date ? `&date=${sp.date}` : ''}`}
+                  className="rounded-full px-2 py-0.5 text-xs text-firuza-700 ring-1 ring-sand-300 hover:bg-firuza-50">
+                  {t(seasonTitleKey(s))}
+                </Link>
+              ))}
+            </span>
+          </div>
+        )}
+        <PriceTable board={board} lang={lang} t={t} trend={trend} highlight={seasonal} />
         {board.rows.length > 0 && <p className="mt-2 text-sm text-stone-600">{t('prc.chartsHint')}</p>}
       </div>
 

@@ -8,6 +8,7 @@ import { getCurrentUser } from '@/lib/auth-guards';
 import { htmlLang } from '@/lib/i18n';
 import { getT } from '@/lib/i18n-server';
 import { getBadgeCount } from '@/lib/queries/bookings';
+import { getDemandBadge } from '@/lib/queries/demand';
 import './globals.css';
 
 function preloadFonts(): void {
@@ -41,7 +42,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   preloadFonts();
   // Без БД (например, при недоступном Neon) шапка всё равно рисуется — как для гостя
   const user = await getCurrentUser().catch(() => null);
-  const badge = user ? await getBadgeCount(user.id) : 0;
+  // Бейдж: заявки и брони + новые «кличи» рядом с моей техникой и отклики на мои запросы
+  const badge = user ? (await getBadgeCount(user.id)) + (await getDemandBadge(user.id)) : 0;
   return (
     <html lang={htmlLang(lang)}>
       {/* Отступ снизу на телефоне = высота нижней панели (64px + полоса орнамента 6px) */}

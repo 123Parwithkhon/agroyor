@@ -51,3 +51,44 @@ export function jitter([lat, lng]: LatLng, id: number): LatLng {
 
 /** Радиус выезда по умолчанию, если владелец не указал (км). */
 export const DEFAULT_RADIUS_KM = 20;
+
+/** Расстояние по прямой между точками, км (формула гаверсинусов). */
+export function distanceKm([lat1, lng1]: LatLng, [lat2, lng2]: LatLng): number {
+  const rad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * rad;
+  const dLng = (lng2 - lng1) * rad;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLng / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
+/** Расстояние между центрами районов, км (0 — тот же район; null — неизвестный код). */
+export function districtDistanceKm(a: string, b: string): number | null {
+  if (a === b) return 0;
+  const pa = DISTRICT_CENTERS[a as DistrictCode];
+  const pb = DISTRICT_CENTERS[b as DistrictCode];
+  if (!pa || !pb) return null;
+  return Math.round(distanceKm(pa, pb) * 10) / 10;
+}
+
+/** Районы, центры которых не дальше radiusKm от центра district (включая сам район). */
+export function nearbyDistricts(district: string, radiusKm: number): string[] {
+  return (Object.keys(DISTRICT_CENTERS) as DistrictCode[]).filter((code) => {
+    const d = districtDistanceKm(district, code);
+    return d !== null && d <= radiusKm;
+  });
+}
+
+/** Ближайший к району рынок (индекс в списке точек рынков) — «точка А» для рейса с поля. */
+export function nearestIndex(from: LatLng, points: (LatLng | null)[]): number | null {
+  let best: number | null = null;
+  let bestKm = Infinity;
+  points.forEach((p, i) => {
+    if (!p) return;
+    const km = distanceKm(from, p);
+    if (km < bestKm) {
+      bestKm = km;
+      best = i;
+    }
+  });
+  return best;
+}

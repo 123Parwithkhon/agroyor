@@ -126,4 +126,38 @@ export const DEMO_PHOTOS = {
   umz6: '/demo-photos/umz6.jpg',
   niva: '/demo-photos/niva.jpg',
   t40: '/demo-photos/t40.jpg',
+  kps4: '/demo-photos/kps4.jpg',
+  neva: '/demo-photos/neva.jpg',
+  zubr: '/demo-photos/zubr.jpg',
+  sz36: '/demo-photos/sz36.jpg',
+  op2000: '/demo-photos/op2000.jpg',
+  backpack: '/demo-photos/backpack.jpg',
+  pts4: '/demo-photos/pts4.jpg',
+  pts2: '/demo-photos/pts2.jpg',
+  pump: '/demo-photos/pump.jpg',
 };
+
+/**
+ * «Сигнал дефицита»: кличи фермеров (from — через сколько дней нужна техника).
+ * В Исфаре и Спитамене не хватает комбайнов — это видно в «Аналитике региона».
+ * respond — ключи демо-техники, владельцы которой уже откликнулись.
+ */
+export const DEMO_REQUESTS = [
+  { user: 6, type: 'harvester', district: 'spitamen', from: 4, area: 4, budget: 350, note: 'Ҷамъоварии гандум, роҳ то майдон хуб аст' },
+  { user: 5, type: 'harvester', district: 'isfara', from: 6, area: 6, budget: 900, note: '' },
+  { user: 9, type: 'harvester', district: 'isfara', from: 9, area: 3, budget: null, note: 'Ҷав' },
+  { user: 8, type: 'drone', district: 'konibodom', from: 5, area: 5, budget: 130, note: 'Дорупошии боғи себ', respond: ['t40'] },
+  { user: 7, type: 'seeder', district: 'j-rasulov', from: 10, area: 2, budget: null, note: '' },
+];
+
+/**
+ * «Рейс поле → рынок»: product и market — английские названия из сида.
+ * Истаравшан и Ғончӣ (16 км) едут в Худжанд в один день — попутчики; Исфара и Канибадам — тоже.
+ */
+export const DEMO_TRIPS = [
+  { user: 2, product: 'Apples', tons: 3, from: 'istaravshan', market: 'Khujand', day: 1 },
+  { user: 8, product: 'Apples', tons: 2, from: 'ghonchi', market: 'Khujand', day: 1 },
+  { user: 4, product: 'Dried apricots', tons: 1.5, from: 'isfara', market: 'Khujand', day: 2 },
+  { user: 5, product: 'Onion', tons: 4, from: 'konibodom', market: 'Khujand', day: 2 },
+  { user: 1, product: 'Potato', tons: 5, from: 'b-gafurov', market: 'Istaravshan', day: 3 },
+];

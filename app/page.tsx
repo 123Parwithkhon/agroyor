@@ -4,6 +4,8 @@ import { EquipmentCard } from '@/components/EquipmentCard';
 import { HeroLandscape } from '@/components/landing/HeroLandscape';
 import Icon, { type IconName } from '@/components/landing/Icon';
 import { OrnateHeading } from '@/components/ornaments';
+import SeasonCalendar, { type SeasonView } from '@/components/season/SeasonCalendar';
+import { isSeasonalProduct, SEASON_INFO, SEASONS, seasonMonthsKey, seasonOf, seasonTasksKey, seasonTitleKey } from '@/lib/season';
 import Delta from '@/components/prices/Delta';
 import { getCurrentUser } from '@/lib/auth-guards';
 import { DISTRICTS } from '@/lib/districts';
@@ -117,6 +119,22 @@ export default async function HomePage() {
     { icon: 'shield', title: t('land.why3t'), text: t('land.why3') },
     { icon: 'calendar', title: t('land.why4t'), text: t('land.why4') },
   ];
+  // Агро-календарь: шесть периодов, сезонные продукты — из активных продуктов рынка
+  const seasons: SeasonView[] = SEASONS.map((s) => ({
+    id: s,
+    title: t(seasonTitleKey(s)),
+    months: t(seasonMonthsKey(s)),
+    tasks: t(seasonTasksKey(s)),
+    types: SEASON_INFO[s].types.map((k) => ({ key: k, label: t(typeKey(k)) })),
+    products: products.filter((p) => isSeasonalProduct(s, p.name_en ?? '')).map((p) => ({ id: p.id, name: pickName(p, lang) })),
+  }));
+  const tools: { href: string; icon: IconName; title: string; text: string; accent: string }[] = [
+    { href: '/equipment/match', icon: 'sparkles', title: t('tools.match'), text: t('tools.matchText'), accent: 'border-zar-500' },
+    { href: '/requests', icon: 'megaphone', title: t('tools.demand'), text: t('tools.demandText'), accent: 'border-anor-600' },
+    { href: '/trips', icon: 'truck', title: t('tools.trips'), text: t('tools.tripsText'), accent: 'border-firuza-600' },
+    { href: '/analytics', icon: 'bars', title: t('tools.analytics'), text: t('tools.analyticsText'), accent: 'border-lapis-700' },
+  ];
+
   const statItems = [
     { value: stats.equipment, label: t('land.statEquipment') },
     { value: stats.markets, label: t('land.statMarkets') },
@@ -127,7 +145,9 @@ export default async function HomePage() {
     <>
       {/* 1. Герой: небо на рассвете, горы и поля; слева текст, справа поиск */}
       <section className="full-bleed hero-sky on-dark relative -mt-6 overflow-hidden text-white">
-        <HeroLandscape id="hero" className="pointer-events-none absolute inset-x-0 bottom-0 h-40 w-full sm:h-60 lg:h-72" />
+        <HeroLandscape id="hero" className="pointer-events-none absolute inset-0 size-full" />
+        {/* Затемнение слева и сверху — белый текст читается поверх гор */}
+        <div aria-hidden="true" className="hero-scrim pointer-events-none absolute inset-0" />
 
         <div className="relative mx-auto grid w-full max-w-5xl grid-cols-1 gap-10 px-4 pb-48 pt-12 sm:pb-64 sm:pt-20 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-center lg:gap-14 lg:pb-72">
           <div>
@@ -216,6 +236,40 @@ export default async function HomePage() {
       </section>
 
       <div className="space-y-16 pt-16 sm:space-y-24 sm:pt-20">
+        {/* Агро-календарь сезона: что делать сейчас, какая техника и какие товары в сезоне */}
+        <section>
+          <SectionHead title={t('season.title')} text={t('season.text')} />
+          <div className="mt-6">
+            <SeasonCalendar
+              seasons={seasons}
+              current={seasonOf(todayInDushanbe())}
+              labels={{
+                now: t('season.now'), equipment: t('season.equipment'), products: t('season.products'),
+                openPrices: t('season.openPrices'), match: t('match.cta'),
+              }}
+            />
+          </div>
+        </section>
+
+        {/* Умные инструменты: подбор комплекса, клич, рейс на рынок, аналитика региона */}
+        <section>
+          <SectionHead title={t('tools.title')} text={t('tools.text')} />
+          <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {tools.map((x) => (
+              <li key={x.href} className="grid">
+                <Link
+                  href={x.href}
+                  className={`group flex flex-col gap-2 rounded-2xl border-t-4 bg-white p-5 shadow-sm ring-1 ring-sand-200 transition hover:-translate-y-0.5 hover:shadow-lg ${x.accent}`}
+                >
+                  <Icon name={x.icon} className="size-9 text-lapis-800" />
+                  <span className="text-lg font-bold text-lapis-900 group-hover:underline">{x.title}</span>
+                  <span className="text-sm leading-relaxed text-stone-600">{x.text}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+
         {/* 3. Виды техники — спокойные белые карточки с контурными иконками */}
         <section>
           <SectionHead title={t('land.typesTitle')} text={t('land.typesText')} />
@@ -360,7 +414,7 @@ export default async function HomePage() {
 
         {/* 8. Призыв для владельцев техники: тот же рассвет, что и наверху */}
         <section className="hero-sky on-dark relative overflow-hidden rounded-3xl px-6 pb-40 pt-12 text-center text-white shadow-xl sm:px-12 sm:pb-52">
-          <HeroLandscape id="join" className="pointer-events-none absolute inset-x-0 bottom-0 h-32 w-full sm:h-44" />
+          <HeroLandscape id="join" compact className="pointer-events-none absolute inset-x-0 bottom-0 h-32 w-full sm:h-44" />
           <div className="relative">
             <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{t('land.joinTitle')}</h2>
             <p className="mx-auto mt-4 max-w-xl text-lg text-lapis-100/90">{t('land.joinText')}</p>

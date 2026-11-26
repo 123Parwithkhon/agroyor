@@ -35,9 +35,11 @@ type Props = {
   t: T;
   /** Средние цены за 7 дней по продуктам — мини-график под названием (необязательно) */
   trend?: Record<number, number[]>;
+  /** Сезонные продукты (агро-календарь): строки подсвечены золотом */
+  highlight?: Set<number>;
 };
 
-export function PriceTable({ board, lang, t, trend }: Props) {
+export function PriceTable({ board, lang, t, trend, highlight }: Props) {
   if (!board.date || board.rows.length === 0) {
     return <p className="rounded-xl border border-sand-200 bg-white p-5 text-center text-stone-600">{t('common.noData')}</p>;
   }
@@ -68,11 +70,19 @@ export function PriceTable({ board, lang, t, trend }: Props) {
           </thead>
           <tbody>
             {board.rows.map((row) => (
-              <tr key={row.product.id} className="border-t border-sand-100 bg-white odd:bg-sand-50">
+              <tr
+                key={row.product.id}
+                className={`border-t border-sand-100 ${highlight?.has(row.product.id) ? 'bg-zar-50' : 'bg-white odd:bg-sand-50'}`}
+              >
                 <th scope="row" className="sticky left-0 bg-inherit px-3 py-2.5 text-left font-semibold">
                   <Link href={`/prices/${row.product.id}`} className="text-lapis-900 underline-offset-2 hover:underline">
                     {localizedName(row.product, lang)}
                   </Link>
+                  {highlight?.has(row.product.id) && (
+                    <span className="ms-1.5 rounded-full bg-zar-300 px-1.5 py-0.5 align-middle text-[10px] font-bold text-lapis-900">
+                      {t('season.badge')}
+                    </span>
+                  )}
                   <span className="mt-0.5 flex items-center gap-1.5 text-xs font-normal whitespace-nowrap text-stone-500">
                     1 {t(productUnitKey(row.product.unit))}
                     {trend?.[row.product.id] && (

@@ -6,7 +6,7 @@ import { db } from '@/lib/db';
 const WINDOW_MINUTES = 10;
 const MAX_ATTEMPTS = 10;
 
-export type RateLimitAction = 'login' | 'login_api' | 'register' | 'booking';
+export type RateLimitAction = 'login' | 'login_api' | 'register' | 'booking' | 'demand' | 'trip';
 
 async function clientIp(): Promise<string> {
   const h = await headers();

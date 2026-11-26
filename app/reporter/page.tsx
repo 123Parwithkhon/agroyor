@@ -91,9 +91,9 @@ export default async function ReporterPage({
             <Link href="/prices" className="inline-flex min-h-11 items-center rounded-lg bg-firuza-700 px-3 font-semibold text-white">
               {t('rep.viewSite')}
             </Link>
-            <a href={`/api/prices.csv?from=${date}&to=${date}&market=${encodeURIComponent(market.id)}`}
+            <a href={`/api/prices.xlsx?from=${date}&to=${date}&market=${encodeURIComponent(market.id)}`}
               className="inline-flex min-h-11 items-center rounded-lg border border-firuza-700 px-3 font-semibold text-firuza-800">
-              {t('prc.csv')}
+              {t('prc.xlsx')}
             </a>
           </div>
         </div>

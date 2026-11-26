@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { buildCsv, csvCell, parsePrice, pickName, shiftDate } from '@/lib/prices-rules';
+import { parsePrice, pickName, shiftDate } from '@/lib/prices-rules';
 
 test('parsePrice принимает нормальные цены', () => {
   assert.deepEqual(parsePrice('12'), { ok: true, value: 12 });
@@ -13,17 +13,6 @@ test('parsePrice отклоняет мусор и значения вне диа
   for (const v of ['0', '-5', '100000', 'abc', '12.345', '', '1e3']) {
     assert.equal(parsePrice(v).ok, false, v);
   }
-});
-
-test('CSV начинается с BOM и экранирует запятые и кавычки', () => {
-  const csv = buildCsv(['a', 'b'], [['x,y', 'say "hi"']]);
-  assert.ok(csv.startsWith('﻿'));
-  assert.ok(csv.includes('"x,y","say ""hi"""'));
-});
-
-test('CSV нейтрализует формулы, но не трогает числа', () => {
-  assert.equal(csvCell('=SUM(A1)'), "'=SUM(A1)");
-  assert.equal(csvCell(-5), '-5');
 });
 
 test('shiftDate сдвигает через границу месяца', () => {

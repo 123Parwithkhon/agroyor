@@ -70,3 +70,29 @@ export async function searchEquipmentForMap(f: Omit<CatalogFilters, 'sort' | 'pa
     LIMIT 300
   `;
 }
+
+export type MatchItem = {
+  id: number;
+  type: EquipmentType;
+  title: string;
+  district: string;
+  price: number;
+  price_unit: 'day' | 'hour' | 'hectare';
+  with_operator: boolean;
+  service_radius_km: number | null;
+  photo: string | null;
+  owner_rating: number | null;
+};
+
+/** Кандидаты для «Подобрать комплекс»: вся доступная техника нужных видов (каталог небольшой). */
+export async function listForMatching(types: EquipmentType[]): Promise<MatchItem[]> {
+  if (types.length === 0) return [];
+  return db()<MatchItem[]>`
+    SELECT e.id, e.type, e.title, e.district, e.price, e.price_unit, e.with_operator, e.service_radius_km,
+           e.photos[1] AS photo,
+           (SELECT round(avg(rating), 1) FROM reviews WHERE target_user_id = u.id) AS owner_rating
+    FROM equipment e JOIN users u ON u.id = e.owner_id
+    WHERE e.active AND NOT e.hidden_by_admin AND NOT u.blocked AND e.type = ANY(${types}::equipment_type[])
+    ORDER BY e.id
+    LIMIT 500`;
+}
